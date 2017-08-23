@@ -56,6 +56,20 @@ func NewDeviceInfo(d *Device) (ni *DeviceInfo, errs []error) {
 
 	var e error
 
+	ni = new(DeviceInfo)
+
+	ni.VendorID = d.GetVendorID()
+	ni.ProductID = d.GetProductID()
+	ni.BusNumber = d.GetBusNumber()
+	ni.BusAddress = d.GetBusAddress()
+	ni.USBSpec = d.GetUSBSpec()
+	ni.USBClass = d.GetUSBClass()
+	ni.USBSubclass = d.GetUSBSubclass()
+	ni.USBProtocol = d.GetUSBProtocol()
+	ni.DeviceSpeed = d.GetDeviceSpeed()
+	ni.DeviceVer = d.GetDeviceVer()
+	ni.MaxPktSize = d.GetMaxPktSize()
+/*
 	ni = &DeviceInfo {
 		VendorID:	d.GetVendorID(),
 		ProductID:	d.GetProductID(),
@@ -68,6 +82,7 @@ func NewDeviceInfo(d *Device) (ni *DeviceInfo, errs []error) {
 		DeviceSpeed:	d.GetDeviceSpeed(),
 		DeviceVer:	d.GetDeviceVer(),
 		MaxPktSize:	d.GetMaxPktSize()}
+*/
 
 	if ni.HostName, e = os.Hostname(); e != nil {errs = append(errs, e)}
 	if ni.VendorName, e = d.GetVendorName(); e != nil {errs = append(errs, e)}

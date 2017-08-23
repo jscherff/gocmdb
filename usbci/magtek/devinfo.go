@@ -12,21 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package usbci
-
-// https://beta.golang.org/doc/go1.8#language
-// https://play.golang.org/p/QNArOeqy94
+package magtek
 
 import (
+	//"github.com/jscherff/gocmdb/usbci"
 	"os"
 )
 
+// See the following for tips on runtime manipulation of struct tags:
+// https://beta.golang.org/doc/go1.8#language
+// https://play.golang.org/p/QNArOeqy94
+
 type DeviceInfo struct {
 	HostName	string
+	DeviceSN	string
 	VendorID	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
 	ProductID	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
+	SoftwareID	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
 	VendorName	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
 	ProductName	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
+	ProductVer	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
+	FactorySN	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
 	DescriptSN	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
 	BusNumber	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
 	BusAddress	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
@@ -37,14 +43,19 @@ type DeviceInfo struct {
 	DeviceSpeed	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
 	DeviceVer	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
 	MaxPktSize	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
+	BufferSize	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
 }
 
 type DeviceInfoMin struct {
 	HostName	string
+	DeviceSN	string
 	VendorID	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
 	ProductID	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
+	SoftwareID	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
 	VendorName	string	`json:"-" xml:"-" csv:"-"`
 	ProductName	string	`json:"-" xml:"-" csv:"-"`
+	ProductVer	string	`json:"-" xml:"-" csv:"-"`
+	FactorySN	string	`json:"-" xml:"-" csv:"-"`
 	DescriptSN	string	`json:"-" xml:"-" csv:"-"`
 	BusNumber	string	`json:"-" xml:"-" csv:"-"`
 	BusAddress	string	`json:"-" xml:"-" csv:"-"`
@@ -55,47 +66,14 @@ type DeviceInfoMin struct {
 	DeviceSpeed	string	`json:"-" xml:"-" csv:"-"`
 	DeviceVer	string	`json:"-" xml:"-" csv:"-"`
 	MaxPktSize	string	`json:"-" xml:"-" csv:"-"`
+	BufferSize	string	`json:"-" xml:"-" csv:"-"`
 }
 
-var ImportMap = map[string]string {
-	"host_name":	"HostName",
-	"vendor_id":	"VendorID",
-	"product_id":	"ProductID",
-	"vendor_name":	"VendorName",
-	"product_name":	"ProductName",
-	"descript_sn":	"DescriptSN",
-	"bus_number":	"BusNumber",
-	"bus_address":	"BusAddress",
-	"usb_spec":	"USBSpec",
-	"usb_class":	"USBClass",
-	"usb_subclass":	"USBSubclass",
-	"usb_protocol":	"USBProtocol",
-	"device_speed":	"DeviceSpeed",
-	"device_ver":	"DeviceVer",
-	"max_pkt_size":	"MaxPktSize"}
-
-var ExportMap = map[string]string {
-	"HostName":	"host_name",
-	"VendorID":	"vendor_id",
-	"ProductID":	"product_id",
-	"VendorName":	"vendor_name",
-	"ProductName":	"product_name",
-	"DescriptSN":	"descript_sn",
-	"BusNumber":	"bus_number",
-	"BusAddress":	"bus_address",
-	"USBSpec":	"usb_spec",
-	"USBClass":	"usb_class",
-	"USBSubclass":	"usb_subclass",
-	"USBProtocol":	"usb_protocol",
-	"DeviceSpeed":	"device_speed",
-	"DeviceVer":	"device_ver",
-	"MaxPktSize":	"max_pkt_size"}
-
-func NewDeviceInfo(d *Device) (i *DeviceInfo, errs []error) {
+func NewDeviceInfo(d *Device) (ni *DeviceInfo, errs []error) {
 
 	var e error
 
-	i = &DeviceInfo {
+	ni = &DeviceInfo {
 		VendorID:	d.GetVendorID(),
 		ProductID:	d.GetProductID(),
 		BusNumber:	d.GetBusNumber(),
@@ -108,10 +86,15 @@ func NewDeviceInfo(d *Device) (i *DeviceInfo, errs []error) {
 		DeviceVer:	d.GetDeviceVer(),
 		MaxPktSize:	d.GetMaxPktSize()}
 
-	if i.HostName, e = os.Hostname(); e != nil {errs = append(errs, e)}
-	if i.VendorName, e = d.GetVendorName(); e != nil {errs = append(errs, e)}
-	if i.ProductName, e = d.GetProductName(); e != nil {errs = append(errs, e)}
-	if i.DescriptSN, e = d.GetDescriptSN(); e != nil {errs = append(errs, e)}
+	if ni.HostName, e = os.Hostname(); e != nil {errs = append(errs, e)}
+	if ni.DeviceSN, e = d.GetDeviceSN(); e != nil {errs = append(errs, e)}
+	if ni.SoftwareID, e = d.GetSoftwareID(); e != nil {errs = append(errs, e)}
+	if ni.VendorName, e = d.GetVendorName(); e != nil {errs = append(errs, e)}
+	if ni.ProductName, e = d.GetProductName(); e != nil {errs = append(errs, e)}
+	if ni.ProductVer, e = d.GetProductVer(); e != nil {errs = append(errs, e)}
+	if ni.FactorySN, e = d.GetFactorySN(); e != nil {errs = append(errs, e)}
+	if ni.DescriptSN, e = d.GetDescriptSN(); e != nil {errs = append(errs, e)}
+	if ni.BufferSize, e = d.GetBufferSize(); e != nil {errs = append(errs, e)}
 
-	return i, errs
+	return ni, errs
 }

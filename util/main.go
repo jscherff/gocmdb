@@ -65,20 +65,21 @@ func main() {
 			log.Fatalf("Error: %v", err); continue
 		}
 
-		/*
+
 		di, errs := magtek.NewDeviceInfo(device)
 
 		if len(errs) > 0 {
 			log.Fatalf("Errors encountered"); continue
 		}
-		*/
 
+/*
 		dx := []byte("<DeviceInfo><HostName>John-SurfacePro</HostName><VendorID>0801</VendorID><ProductID>0001</ProductID><VendorName>Mag-Tek</VendorName><ProductName>USB Swipe Reader</ProductName><ProductVer>V05</ProductVer><SoftwareID>21042840G01</SoftwareID><DeviceSN>B164F78</DeviceSN><FactorySN>B164F78022713AA</FactorySN><DescriptSN>B164F78</DescriptSN><BusNumber>1</BusNumber><BusAddress>29</BusAddress><USBSpec>1.10</USBSpec><USBClass>per-interface</USBClass><USBSubclass>per-interface</USBSubclass><USBProtocol>0</USBProtocol><DeviceSpeed>full</DeviceSpeed><DeviceVer>1.00</DeviceVer><MaxPktSize>8</MaxPktSize><BufferSize>60</BufferSize></DeviceInfo>")
 
 		di, err := magtek.NewDeviceInfoFromXML(dx)
 		fmt.Println(di)
 
 		di.SoftwareID = ""
+*/
 
 		b, _ := di.JSON(true)
 		fmt.Println(string(b) + "\n")

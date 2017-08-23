@@ -38,10 +38,12 @@ var (
 )
 
 // NewDevice constructs a new Device.
-func NewDevice(d *gousb.Device) (nd *Device, err error) {
+func NewDevice(d *gousb.Device) (*Device, error) {
 
 	pd, err := usbci.NewDevice(d)
-	nd = &Device{pd, 0}
+	if err != nil {return nil, err}
+
+	nd := &Device{pd, 0}
 	err = nd.findBufferSize()
 
 	return nd, err

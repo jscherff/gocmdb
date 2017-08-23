@@ -33,9 +33,9 @@ type Device struct {
 }
 
 // NewDevice constructs a new Device.
-func NewDevice(d *gousb.Device) (nd *Device, err error) {
+func NewDevice(d *gousb.Device) (*Device, error) {
 
-	nd = &Device{d, 0, 0, 0}
+	nd := &Device{d, 0, 0, 0}
 
 	dd, err := NewDeviceDescriptor(nd)
 

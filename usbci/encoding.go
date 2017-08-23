@@ -14,9 +14,6 @@
 
 package usbci
 
-// https://beta.golang.org/doc/go1.8#language
-// https://play.golang.org/p/QNArOeqy94
-
 import (
 	"encoding/json"
 	"encoding/xml"

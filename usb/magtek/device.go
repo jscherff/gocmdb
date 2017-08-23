@@ -1,7 +1,7 @@
-package gomagtek
+package magtek
 
 import (
-	"github.com/google/gousb"
+	"github.com/jscherff/cmdb/usbci"
 	"strconv"
 	"math"
 	"time"
@@ -13,25 +13,19 @@ import (
 // config descriptor of the active config, and the size of the data buffer
 // required by the device for vendor commands sent via control transfer.
 type Device struct {
-	*gousb.Device
+	*usbci.Device
 	BufferSize int
-	DeviceDescriptor *DeviceDescriptor
-	ConfigDescriptor *ConfigDescriptor
 }
+
+var (
+	bufferSizes = []int {24, 60}
+)
 
 // NewDevice constructs a new Device.
 func NewDevice(d *gousb.Device) (nd *Device, err error) {
 
-	nd = &Device{d, 0, new(DeviceDescriptor), new(ConfigDescriptor)}
-
+	nd = &Device{d, 0}
 	err = nd.findBufferSize()
-
-	if err != nil {
-		return nd, err
-	}
-
-	_ = nd.getDeviceDescriptor()
-	_ = nd.getConfigDescriptor()
 
 	return nd, err
 }
@@ -218,7 +212,7 @@ func (d *Device) DeviceReset() (err error) {
 		RequestDirectionOut + RequestTypeClass + RequestRecipientDevice,
 		RequestSetReport,
 		TypeFeatureReport,
-		InterfaceNumber,
+		ControlInterface,
 		data)
 
 	if err != nil {
@@ -231,7 +225,7 @@ func (d *Device) DeviceReset() (err error) {
 		RequestDirectionIn + RequestTypeClass + RequestRecipientDevice,
 		RequestGetReport,
 		TypeFeatureReport,
-		InterfaceNumber,
+		ControlInterface,
 		data)
 
 	if err != nil {
@@ -257,7 +251,7 @@ func (d *Device) getDeviceDescriptor() (err error) {
 		RequestDirectionIn + RequestTypeStandard + RequestRecipientDevice,
 		RequestGetDescriptor,
 		TypeDeviceDescriptor,
-		InterfaceNumber,
+		ControlInterface,
 		data)
 
 	if err == nil {
@@ -293,7 +287,7 @@ func (d *Device) getConfigDescriptor() (err error) {
 		RequestDirectionIn + RequestTypeStandard + RequestRecipientDevice,
 		RequestGetDescriptor,
 		TypeConfigDescriptor,
-		InterfaceNumber,
+		ControlInterface,
 		data)
 
 	if err == nil {
@@ -322,7 +316,7 @@ func (d *Device) findBufferSize() (err error) {
 
 	var rc, size int
 
-	for _, size = range vendorBufferSizes {
+	for _, size = range bufferSizes {
 
 		data := make([]byte, size)
 		copy(data, []byte{CommandGetProp, 0x01, PropSoftwareID})
@@ -331,7 +325,7 @@ func (d *Device) findBufferSize() (err error) {
 			RequestDirectionOut + RequestTypeClass + RequestRecipientDevice,
 			RequestSetReport,
 			TypeFeatureReport,
-			InterfaceNumber,
+			ControlInterface,
 			data)
 
 		data = make([]byte, size)
@@ -340,7 +334,7 @@ func (d *Device) findBufferSize() (err error) {
 			RequestDirectionIn + RequestTypeClass + RequestRecipientDevice,
 			RequestGetReport,
 			TypeFeatureReport,
-			InterfaceNumber,
+			ControlInterface,
 			data)
 
 		if rc == size {
@@ -366,7 +360,7 @@ func (d *Device) getProperty(id uint8) (value string, err error) {
 		RequestDirectionOut + RequestTypeClass + RequestRecipientDevice,
 		RequestSetReport,
 		TypeFeatureReport,
-		InterfaceNumber,
+		ControlInterface,
 		data)
 
 	if err != nil {
@@ -379,7 +373,7 @@ func (d *Device) getProperty(id uint8) (value string, err error) {
 		RequestDirectionIn + RequestTypeClass + RequestRecipientDevice,
 		RequestGetReport,
 		TypeFeatureReport,
-		InterfaceNumber,
+		ControlInterface,
 		data)
 
 	if err != nil {
@@ -413,7 +407,7 @@ func (d *Device) setProperty(id uint8, value string) (err error) {
 		RequestDirectionOut + RequestTypeClass + RequestRecipientDevice,
 		RequestSetReport,
 		TypeFeatureReport,
-		InterfaceNumber,
+		ControlInterface,
 		data)
 
 	if err != nil {
@@ -426,7 +420,7 @@ func (d *Device) setProperty(id uint8, value string) (err error) {
 		RequestDirectionIn + RequestTypeClass + RequestRecipientDevice,
 		RequestGetReport,
 		TypeFeatureReport,
-		InterfaceNumber,
+		ControlInterface,
 		data)
 
 	if err != nil {

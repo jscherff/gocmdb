@@ -1,4 +1,18 @@
-package gomagtek
+// Copyright 2017 John Scherff
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package usbci
 
 import (
 	"github.com/google/gousb"
@@ -26,21 +40,21 @@ type DeviceDescriptor struct {
 }
 
 // NewDeviceDescriptor constructs a new DeviceDescriptor.
-func NewDeviceDescriptor(d *gousb.Device) (ndd *DeviceDescriptor, err error) {
+func NewDeviceDescriptor(d *gousb.Device) (dd *DeviceDescriptor, err error) {
 
-	ndd = new(DeviceDescriptor)
+	dd = new(DeviceDescriptor)
 	data := make([]byte, BufferSizeDeviceDescriptor)
 
 	_, err = d.Control(
 		RequestDirectionIn + RequestTypeStandard + RequestRecipientDevice,
 		RequestGetDescriptor,
 		TypeDeviceDescriptor,
-		InterfaceNumber,
+		ControlInterface,
 		data)
 
 	if err == nil {
 
-		*ndd = DeviceDescriptor {
+		*dd = DeviceDescriptor {
 			data[0],
 			data[1],
 			uint16(data[2]) + (uint16(data[3])<<8),
@@ -59,7 +73,7 @@ func NewDeviceDescriptor(d *gousb.Device) (ndd *DeviceDescriptor, err error) {
 		err = fmt.Errorf("%s: %v", getFunctionInfo(), err)
 	}
 
-	return ndd, err
+	return dd, err
 }
 
 // ConfigDescriptor represents the active configuration of the USB device.
@@ -76,21 +90,21 @@ type ConfigDescriptor struct {
 }
 
 // NewConfigDescriptor constructs a new ConfigDescriptor.
-func NewConfigDescriptor(d *gousb.Device) (ncd *ConfigDescriptor, err error) {
+func NewConfigDescriptor(d *gousb.Device) (cd *ConfigDescriptor, err error) {
 
-	ncd = new(ConfigDescriptor)
+	cd = new(ConfigDescriptor)
 	data := make([]byte, BufferSizeConfigDescriptor)
 
 	_, err = d.Control(
 		RequestDirectionIn + RequestTypeStandard + RequestRecipientDevice,
 		RequestGetDescriptor,
 		TypeConfigDescriptor,
-		InterfaceNumber,
+		ControlInterface,
 		data)
 
 	if err == nil {
 
-		*ncd = ConfigDescriptor {
+		*cd = ConfigDescriptor {
 			data[0],
 			data[1],
 			uint16(data[2]) + (uint16(data[3]) << 8),
@@ -103,5 +117,5 @@ func NewConfigDescriptor(d *gousb.Device) (ncd *ConfigDescriptor, err error) {
 		err = fmt.Errorf("%s: %v", getFunctionInfo(), err)
 	}
 
-	return ncd, err
+	return cd, err
 }

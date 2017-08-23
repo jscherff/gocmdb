@@ -1,4 +1,4 @@
-package gomagtek
+package magtek
 
 import (
 	"strings"

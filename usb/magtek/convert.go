@@ -1,4 +1,4 @@
-package gomagtek
+package magtek
 
 // https://beta.golang.org/doc/go1.8#language
 // https://play.golang.org/p/QNArOeqy94

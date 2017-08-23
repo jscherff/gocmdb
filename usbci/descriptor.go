@@ -15,7 +15,7 @@
 package usbci
 
 import (
-	"github.com/google/gousb"
+	"github.com/jscherff/gocmdb"
 	"fmt"
 )
 
@@ -35,12 +35,12 @@ type DeviceDescriptor struct {
 	DeviceReleaseNumber uint16	// BCD of Device Release Number
 	ManufacturerIndex uint8		// Index Manufacturer String Descriptor
 	ProductIndex uint8		// Index of Product String Descriptor
-	SerialNumIndex uint8		// Index of Serial Number String Descriptor
+	SerialIndex uint8		// Index of Serial Number String Descriptor
 	NumConfigurations uint8		// Number of Possible Configurations
 }
 
 // NewDeviceDescriptor constructs a new DeviceDescriptor.
-func NewDeviceDescriptor(d *gousb.Device) (dd *DeviceDescriptor, err error) {
+func NewDeviceDescriptor(d *Device) (dd *DeviceDescriptor, err error) {
 
 	dd = new(DeviceDescriptor)
 	data := make([]byte, BufferSizeDeviceDescriptor)
@@ -70,7 +70,7 @@ func NewDeviceDescriptor(d *gousb.Device) (dd *DeviceDescriptor, err error) {
 			data[16],
 			data[17]}
 	} else {
-		err = fmt.Errorf("%s: %v", getFunctionInfo(), err)
+		err = fmt.Errorf("%s: %v", gocmdb.GetFunctionInfo(), err)
 	}
 
 	return dd, err
@@ -90,7 +90,7 @@ type ConfigDescriptor struct {
 }
 
 // NewConfigDescriptor constructs a new ConfigDescriptor.
-func NewConfigDescriptor(d *gousb.Device) (cd *ConfigDescriptor, err error) {
+func NewConfigDescriptor(d *Device) (cd *ConfigDescriptor, err error) {
 
 	cd = new(ConfigDescriptor)
 	data := make([]byte, BufferSizeConfigDescriptor)
@@ -114,7 +114,7 @@ func NewConfigDescriptor(d *gousb.Device) (cd *ConfigDescriptor, err error) {
 			data[7],
 			data[8]}
 	} else {
-		err = fmt.Errorf("%s: %v", getFunctionInfo(), err)
+		err = fmt.Errorf("%s: %v", gocmdb.GetFunctionInfo(), err)
 	}
 
 	return cd, err

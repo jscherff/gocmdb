@@ -1,7 +1,23 @@
+// Copyright 2017 John Scherff
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package magtek
 
 import (
-	"github.com/jscherff/cmdb/usbci"
+	"github.com/google/gousb"
+	"github.com/jscherff/gocmdb"
+	"github.com/jscherff/gocmdb/usbci"
 	"strconv"
 	"math"
 	"time"
@@ -24,65 +40,11 @@ var (
 // NewDevice constructs a new Device.
 func NewDevice(d *gousb.Device) (nd *Device, err error) {
 
-	nd = &Device{d, 0}
+	pd, err := usbci.NewDevice(d)
+	nd = &Device{pd, 0}
 	err = nd.findBufferSize()
 
 	return nd, err
-}
-
-// GetBusNumber retrieves the USB bus number of the device.
-func (d *Device) GetBusNumber() string {
-	return strconv.Itoa(d.Desc.Bus)
-}
-
-// GetBusAddress retrieves address of the device on the USB bus.
-func (d *Device) GetBusAddress() string {
-	return strconv.Itoa(d.Desc.Address)
-}
-
-// GetDeviceSpeed retrieves the negotiated operating speed of the device.
-func (d *Device) GetDeviceSpeed() string {
-	return d.Desc.Speed.String()
-}
-
-// GetUSBSpec retrieves the USB specification release number of the device.
-func (d *Device) GetUSBSpec() string {
-	return d.Desc.Spec.String()
-}
-
-// GetDeviceVer retrieves the major/minor version number ofthe device.
-func (d *Device) GetDeviceVer() string {
-	return d.Desc.Device.String()
-}
-
-// GetVendorId retrieves the USB vendor ID of the device.
-func (d *Device) GetVendorID() string {
-	return d.Desc.Vendor.String()
-}
-
-// GetProductID retrieves the USB product ID of the device.
-func (d *Device) GetProductID() string {
-	return d.Desc.Product.String()
-}
-
-// GetUSBClass retrieves the USB class of the device.
-func (d *Device) GetUSBClass() string {
-	return d.Desc.Class.String()
-}
-
-// GetUSBSubclass retrieves the USB subclass of the device.
-func (d *Device) GetUSBSubclass() string {
-	return d.Desc.SubClass.String()
-}
-
-// GetUSBProtocol retrieves the USB protocol of the device.
-func (d *Device) GetUSBProtocol() string {
-	return d.Desc.Protocol.String()
-}
-
-// GetMaxPktSize retrieves the maximum size of the control transfer.
-func (d *Device) GetMaxPktSize() string {
-	return strconv.Itoa(d.Desc.MaxControlPacketSize)
 }
 
 // GetBufferSize retrieves the size of the device data buffer.
@@ -90,58 +52,59 @@ func (d *Device) GetBufferSize() (string, error) {
 	return strconv.Itoa(d.BufferSize), nil
 }
 
-// GetSoftwareID retrieves the software ID from the device NVRAM.
+// GetSoftwareID retrieves the software ID of the device from NVRAM.
 func (d *Device) GetSoftwareID() (string, error) {
 	return d.getProperty(PropSoftwareID)
 }
 
-// GetProductVer retrieves the MagneSafe version from device NVRAM.
+// GetProductVer retrieves the product version of the device from NVRAM.
 func (d *Device) GetProductVer() (value string, err error) {
 	value, err = d.getProperty(PropProductVer)
 	if len(value) <= 1 {value = ""}
 	return value, err
 }
 
-// GetDeviceSN retrieves the configurable serial number from device NVRAM.
+// GetDeviceSN retrieves the device configurable serial number from NVRAM.
 func (d *Device) GetDeviceSN() (string, error) {
 	return d.getProperty(PropDeviceSN)
 }
 
-// SetDeviceSN sets the configurable serial number in device NVRAM.
+// SetDeviceSN sets the device configurable serial number in NVRAM.
 func (d *Device) SetDeviceSN(value string) (error) {
 	return d.setProperty(PropDeviceSN, value)
 }
 
-// EraseDeviceSN removes the configurable serial number from device NVRAM.
+// EraseDeviceSN removes the device configurable serial number from NVRAM.
 func (d *Device) EraseDeviceSN() (error) {
 	return d.setProperty(PropDeviceSN, "")
 }
 
-// GetFactorySN retrieves the factory serial number from device NVRAM.
+// GetFactorySN retrieves the device factory serial number from NVRAM.
 func (d *Device) GetFactorySN() (value string, err error) {
 	value, err = d.getProperty(PropFactorySN)
 	if len(value) <= 1 {value = ""}
 	return value, err
 }
 
-// SetFactorySN sets the factory serial number in device NVRAM. This command
-// will fail with result code 07 if the serial number is already configured.
+// SetFactorySN sets the device factory device serial number in NVRAM.
+// This command will fail with result code 07 if the serial number is
+// already configured.
 func (d *Device) SetFactorySN(value string) (error) {
 	return d.setProperty(PropFactorySN, value)
 }
 
-// CopyFactorySN copies 'length' characters from the factory serial
-// number to the configurable serial number in device NVRAM.
+// CopyFactorySN copies 'length' characters from the device factory
+// serial number to the configurable serial number in NVRAM.
 func (d *Device) CopyFactorySN(length int) (error) {
 
 	fs, err := d.GetFactorySN()
 
 	if err != nil {
-		return fmt.Errorf("%s: %v", getFunctionInfo(), err)
+		return fmt.Errorf("%s: %v", gocmdb.GetFunctionInfo(), err)
 	}
 
 	if len(fs) == 0 {
-		return fmt.Errorf("%s: factory serial number not present", getFunctionInfo())
+		return fmt.Errorf("%s: factory serial number not present", gocmdb.GetFunctionInfo())
 	}
 
 	limit := int(math.Min(float64(length), float64(len(fs))))
@@ -150,58 +113,6 @@ func (d *Device) CopyFactorySN(length int) (error) {
 	return err
 }
 
-// GetVendorName retrieves the manufacturer name from device descriptor.
-func (d *Device) GetVendorName() (value string, err error) {
-
-	if d.DeviceDescriptor.ManufacturerIndex > 0 {
-		value, err = d.GetStringDescriptor(int(d.DeviceDescriptor.ManufacturerIndex))
-	}
-
-	if err != nil {
-		err = fmt.Errorf("%s: %v", getFunctionInfo(), err)
-	}
-
-	return value, err
-}
-
-// GetProductName retrieves the product name from device descriptor.
-func (d *Device) GetProductName() (value string, err error) {
-
-	if d.DeviceDescriptor.ProductIndex > 0 {
-		value, err = d.GetStringDescriptor(int(d.DeviceDescriptor.ProductIndex))
-	}
-
-	if err != nil {
-		err = fmt.Errorf("%s: %v", getFunctionInfo(), err)
-	}
-
-	return value, err
-}
-
-// GetDescriptSN retrieves the serial number of the device from the
-// device descriptor. Changes made to the serial number on the device using a
-// control transfer are not reflected in the device descriptor until the device
-// is power-cycled (unplugged). The most current information is always stored
-// on the device.
-func (d *Device) GetDescriptSN() (value string, err error) {
-
-	if d.DeviceDescriptor.SerialNumIndex > 0 {
-		value, err = d.GetStringDescriptor(int(d.DeviceDescriptor.SerialNumIndex))
-	}
-
-	if err != nil {
-		err = fmt.Errorf("%s: %v", getFunctionInfo(), err)
-	}
-
-	return value, err
-}
-
-// UsbReset performs a USB port reset to reinitialize the device.
-func (d *Device) UsbReset() (err error) {
-	return d.Reset()
-}
-
-
 // DeviceReset resets the device using low-level vendor commands.
 func (d *Device) DeviceReset() (err error) {
 
@@ -209,101 +120,35 @@ func (d *Device) DeviceReset() (err error) {
 	data[0] = CommandResetDevice
 
 	_, err = d.Control(
-		RequestDirectionOut + RequestTypeClass + RequestRecipientDevice,
-		RequestSetReport,
-		TypeFeatureReport,
-		ControlInterface,
+		usbci.RequestDirectionOut + usbci.RequestTypeClass + usbci.RequestRecipientDevice,
+		usbci.RequestSetReport,
+		usbci.TypeFeatureReport,
+		usbci.ControlInterface,
 		data)
 
 	if err != nil {
-		err = fmt.Errorf("%s: %v)", getFunctionInfo(), err)
+		err = fmt.Errorf("%s: %v)", gocmdb.GetFunctionInfo(), err)
 	}
 
 	data = make([]byte, d.BufferSize)
 
 	_, err = d.Control(
-		RequestDirectionIn + RequestTypeClass + RequestRecipientDevice,
-		RequestGetReport,
-		TypeFeatureReport,
-		ControlInterface,
+		usbci.RequestDirectionIn + usbci.RequestTypeClass + usbci.RequestRecipientDevice,
+		usbci.RequestGetReport,
+		usbci.TypeFeatureReport,
+		usbci.ControlInterface,
 		data)
 
 	if err != nil {
-		return fmt.Errorf("%s: %v", getFunctionInfo(), err)
+		return fmt.Errorf("%s: %v", gocmdb.GetFunctionInfo(), err)
 	}
 
 	if data[0] > 0x00 {
 		err = fmt.Errorf("%s: command error: %d",
-			getFunctionInfo(), int(data[0]))
+			gocmdb.GetFunctionInfo(), int(data[0]))
 	}
 
 	time.Sleep(5 * time.Second)
-
-	return err
-}
-
-// getDeviceDescriptor retrieves the raw device descriptor.
-func (d *Device) getDeviceDescriptor() (err error) {
-
-	data := make([]byte, BufferSizeDeviceDescriptor)
-
-	_, err = d.Control(
-		RequestDirectionIn + RequestTypeStandard + RequestRecipientDevice,
-		RequestGetDescriptor,
-		TypeDeviceDescriptor,
-		ControlInterface,
-		data)
-
-	if err == nil {
-
-		*d.DeviceDescriptor = DeviceDescriptor {
-			data[0],
-			data[1],
-			uint16(data[2]) + (uint16(data[3])<<8),
-			data[4],
-			data[5],
-			data[6],
-			data[7],
-			uint16(data[8]) + (uint16(data[9])<<8),
-			uint16(data[10]) + (uint16(data[11])<<8),
-			uint16(data[12]) + (uint16(data[13])<<8),
-			data[14],
-			data[15],
-			data[16],
-			data[17]}
-	} else {
-		err = fmt.Errorf("%s: %v", getFunctionInfo(), err)
-	}
-
-	return err
-}
-
-// getConfigDescriptor retrieves the raw active config descriptor.
-func (d *Device) getConfigDescriptor() (err error) {
-
-	data := make([]byte, BufferSizeConfigDescriptor)
-
-	_, err = d.Control(
-		RequestDirectionIn + RequestTypeStandard + RequestRecipientDevice,
-		RequestGetDescriptor,
-		TypeConfigDescriptor,
-		ControlInterface,
-		data)
-
-	if err == nil {
-
-		*d.ConfigDescriptor = ConfigDescriptor {
-			data[0],
-			data[1],
-			uint16(data[2]) + (uint16(data[3]) << 8),
-			data[4],
-			data[5],
-			data[6],
-			data[7],
-			data[8]}
-	} else {
-		return fmt.Errorf("%s: %v", getFunctionInfo(), err)
-	}
 
 	return err
 }
@@ -322,19 +167,19 @@ func (d *Device) findBufferSize() (err error) {
 		copy(data, []byte{CommandGetProp, 0x01, PropSoftwareID})
 
 		rc, err = d.Control(
-			RequestDirectionOut + RequestTypeClass + RequestRecipientDevice,
-			RequestSetReport,
-			TypeFeatureReport,
-			ControlInterface,
+			usbci.RequestDirectionOut + usbci.RequestTypeClass + usbci.RequestRecipientDevice,
+			usbci.RequestSetReport,
+			usbci.TypeFeatureReport,
+			usbci.ControlInterface,
 			data)
 
 		data = make([]byte, size)
 
 		rc, err = d.Control(
-			RequestDirectionIn + RequestTypeClass + RequestRecipientDevice,
-			RequestGetReport,
-			TypeFeatureReport,
-			ControlInterface,
+			usbci.RequestDirectionIn + usbci.RequestTypeClass + usbci.RequestRecipientDevice,
+			usbci.RequestGetReport,
+			usbci.TypeFeatureReport,
+			usbci.ControlInterface,
 			data)
 
 		if rc == size {
@@ -344,7 +189,7 @@ func (d *Device) findBufferSize() (err error) {
 	}
 
 	if err != nil {
-		err = fmt.Errorf("%s: unsupported device", getFunctionInfo())
+		err = fmt.Errorf("%s: unsupported device", gocmdb.GetFunctionInfo())
 	}
 
 	return err
@@ -357,32 +202,32 @@ func (d *Device) getProperty(id uint8) (value string, err error) {
 	copy(data, []byte{CommandGetProp, 0x01, id})
 
 	_, err = d.Control(
-		RequestDirectionOut + RequestTypeClass + RequestRecipientDevice,
-		RequestSetReport,
-		TypeFeatureReport,
-		ControlInterface,
+		usbci.RequestDirectionOut + usbci.RequestTypeClass + usbci.RequestRecipientDevice,
+		usbci.RequestSetReport,
+		usbci.TypeFeatureReport,
+		usbci.ControlInterface,
 		data)
 
 	if err != nil {
-		return value, fmt.Errorf("%s: %v", getFunctionInfo(), err)
+		return value, fmt.Errorf("%s: %v", gocmdb.GetFunctionInfo(), err)
 	}
 
 	data = make([]byte, d.BufferSize)
 
 	_, err = d.Control(
-		RequestDirectionIn + RequestTypeClass + RequestRecipientDevice,
-		RequestGetReport,
-		TypeFeatureReport,
-		ControlInterface,
+		usbci.RequestDirectionIn + usbci.RequestTypeClass + usbci.RequestRecipientDevice,
+		usbci.RequestGetReport,
+		usbci.TypeFeatureReport,
+		usbci.ControlInterface,
 		data)
 
 	if err != nil {
-		return value, fmt.Errorf("%s: %v", getFunctionInfo(), err)
+		return value, fmt.Errorf("%s: %v", gocmdb.GetFunctionInfo(), err)
 	}
 
 	if data[0] > 0x00 {
 		return value, fmt.Errorf("%s: command error: %d",
-			getFunctionInfo(), int(data[0]))
+			gocmdb.GetFunctionInfo(), int(data[0]))
 	}
 
 	if data[1] > 0x00 {
@@ -396,7 +241,7 @@ func (d *Device) getProperty(id uint8) (value string, err error) {
 func (d *Device) setProperty(id uint8, value string) (err error) {
 
 	if len(value) > d.BufferSize - 3 {
-		return fmt.Errorf("%s: property length > data buffer", getFunctionInfo())
+		return fmt.Errorf("%s: property length > data buffer", gocmdb.GetFunctionInfo())
 	}
 
 	data := make([]byte, d.BufferSize)
@@ -404,32 +249,32 @@ func (d *Device) setProperty(id uint8, value string) (err error) {
 	copy(data[3:], value)
 
 	_, err = d.Control(
-		RequestDirectionOut + RequestTypeClass + RequestRecipientDevice,
-		RequestSetReport,
-		TypeFeatureReport,
-		ControlInterface,
+		usbci.RequestDirectionOut + usbci.RequestTypeClass + usbci.RequestRecipientDevice,
+		usbci.RequestSetReport,
+		usbci.TypeFeatureReport,
+		usbci.ControlInterface,
 		data)
 
 	if err != nil {
-		return fmt.Errorf("%s: %v", getFunctionInfo(), err)
+		return fmt.Errorf("%s: %v", gocmdb.GetFunctionInfo(), err)
 	}
 
 	data = make([]byte, d.BufferSize)
 
 	_, err = d.Control(
-		RequestDirectionIn + RequestTypeClass + RequestRecipientDevice,
-		RequestGetReport,
-		TypeFeatureReport,
-		ControlInterface,
+		usbci.RequestDirectionIn + usbci.RequestTypeClass + usbci.RequestRecipientDevice,
+		usbci.RequestGetReport,
+		usbci.TypeFeatureReport,
+		usbci.ControlInterface,
 		data)
 
 	if err != nil {
-		return fmt.Errorf("%s: %v", getFunctionInfo(), err)
+		return fmt.Errorf("%s: %v", gocmdb.GetFunctionInfo(), err)
 	}
 
 	if data[0] > 0x00 {
 		err = fmt.Errorf("%s: command error: %d",
-			getFunctionInfo(), int(data[0]))
+			gocmdb.GetFunctionInfo(), int(data[0]))
 	}
 
 	return err

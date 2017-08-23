@@ -15,11 +15,9 @@
 package usbci
 
 import (
-	"github.com/jscherff/cmdb"
 	"github.com/google/gousb"
+	"github.com/jscherff/gocmdb"
 	"strconv"
-	"math"
-	"time"
 	"fmt"
 )
 
@@ -34,23 +32,18 @@ type Device struct {
 	SerialIndex int		// Index of Serial Number String Descriptor
 }
 
-var (
-	bufferSizes = []int {24, 60}
-)
-
 // NewDevice constructs a new Device.
 func NewDevice(d *gousb.Device) (nd *Device, err error) {
 
-	nd = &Device{d, 0, new(DeviceDescriptor), new(ConfigDescriptor)}
+	nd = &Device{d, 0, 0, 0}
 
-	err = nd.findBufferSize()
+	dd, err := NewDeviceDescriptor(nd)
 
-	if err != nil {
-		return nd, err
+	if err == nil {
+		nd.ManufacturerIndex = int(dd.ManufacturerIndex)
+		nd.ProductIndex = int(dd.ProductIndex)
+		nd.SerialIndex = int(dd.SerialIndex)
 	}
-
-	_ = nd.getDeviceDescriptor()
-	_ = nd.getConfigDescriptor()
 
 	return nd, err
 }
@@ -113,12 +106,12 @@ func (d *Device) GetMaxPktSize() string {
 // GetVendorName retrieves the manufacturer name from device descriptor.
 func (d *Device) GetVendorName() (value string, err error) {
 
-	if d.DeviceDescriptor.ManufacturerIndex > 0 {
-		value, err = d.GetStringDescriptor(int(d.DeviceDescriptor.ManufacturerIndex))
+	if d.ManufacturerIndex > 0 {
+		value, err = d.GetStringDescriptor(d.ManufacturerIndex)
 	}
 
 	if err != nil {
-		err = fmt.Errorf("%s: %v", getFunctionInfo(), err)
+		err = fmt.Errorf("%s: %v", gocmdb.GetFunctionInfo(), err)
 	}
 
 	return value, err
@@ -127,12 +120,12 @@ func (d *Device) GetVendorName() (value string, err error) {
 // GetProductName retrieves the product name from device descriptor.
 func (d *Device) GetProductName() (value string, err error) {
 
-	if d.DeviceDescriptor.ProductIndex > 0 {
-		value, err = d.GetStringDescriptor(int(d.DeviceDescriptor.ProductIndex))
+	if d.ProductIndex > 0 {
+		value, err = d.GetStringDescriptor(d.ProductIndex)
 	}
 
 	if err != nil {
-		err = fmt.Errorf("%s: %v", getFunctionInfo(), err)
+		err = fmt.Errorf("%s: %v", gocmdb.GetFunctionInfo(), err)
 	}
 
 	return value, err
@@ -144,84 +137,13 @@ func (d *Device) GetProductName() (value string, err error) {
 // is power-cycled or performs a device reset.
 func (d *Device) GetDescriptSN() (value string, err error) {
 
-	if d.DeviceDescriptor.SerialNumIndex > 0 {
-		value, err = d.GetStringDescriptor(int(d.DeviceDescriptor.SerialNumIndex))
+	if d.SerialIndex > 0 {
+		value, err = d.GetStringDescriptor(d.SerialIndex)
 	}
 
 	if err != nil {
-		err = fmt.Errorf("%s: %v", getFunctionInfo(), err)
+		err = fmt.Errorf("%s: %v", gocmdb.GetFunctionInfo(), err)
 	}
 
 	return value, err
-}
-
-// UsbReset performs a USB port reset to reinitialize the device.
-func (d *Device) UsbReset() (err error) {
-	return d.Reset()
-}
-
-// getDeviceDescriptor retrieves the raw device descriptor.
-func (d *Device) getDeviceDescriptor() (err error) {
-
-	data := make([]byte, BufferSizeDeviceDescriptor)
-
-	_, err = d.Control(
-		RequestDirectionIn + RequestTypeStandard + RequestRecipientDevice,
-		RequestGetDescriptor,
-		TypeDeviceDescriptor,
-		ControlInterface,
-		data)
-
-	if err == nil {
-
-		*d.DeviceDescriptor = DeviceDescriptor {
-			data[0],
-			data[1],
-			uint16(data[2]) + (uint16(data[3])<<8),
-			data[4],
-			data[5],
-			data[6],
-			data[7],
-			uint16(data[8]) + (uint16(data[9])<<8),
-			uint16(data[10]) + (uint16(data[11])<<8),
-			uint16(data[12]) + (uint16(data[13])<<8),
-			data[14],
-			data[15],
-			data[16],
-			data[17]}
-	} else {
-		err = fmt.Errorf("%s: %v", getFunctionInfo(), err)
-	}
-
-	return err
-}
-
-// getConfigDescriptor retrieves the raw active config descriptor.
-func (d *Device) getConfigDescriptor() (err error) {
-
-	data := make([]byte, BufferSizeConfigDescriptor)
-
-	_, err = d.Control(
-		RequestDirectionIn + RequestTypeStandard + RequestRecipientDevice,
-		RequestGetDescriptor,
-		TypeConfigDescriptor,
-		ControlInterface,
-		data)
-
-	if err == nil {
-
-		*d.ConfigDescriptor = ConfigDescriptor {
-			data[0],
-			data[1],
-			uint16(data[2]) + (uint16(data[3]) << 8),
-			data[4],
-			data[5],
-			data[6],
-			data[7],
-			data[8]}
-	} else {
-		return fmt.Errorf("%s: %v", getFunctionInfo(), err)
-	}
-
-	return err
 }

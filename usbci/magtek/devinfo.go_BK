@@ -1,0 +1,70 @@
+// Copyright 2017 John Scherff
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package magtek
+
+// https://beta.golang.org/doc/go1.8#language
+// https://play.golang.org/p/QNArOeqy94
+
+import (
+	"github.com/jscherff/gocmdb/usbci"
+	"encoding/json"
+	"encoding/xml"
+	"os"
+)
+
+type DeviceInfo struct {
+	*usbci.DeviceInfo
+	DeviceSN	string
+	SoftwareID	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
+	ProductVer	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
+	FactorySN	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
+	BufferSize	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
+}
+
+type DeviceInfoMin struct {
+	*usbci.DeviceInfoMin
+	DeviceSN	string
+	SoftwareID	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
+	ProductVer	string	`json:"-" xml:"-" csv:"-"`
+	FactorySN	string	`json:"-" xml:"-" csv:"-"`
+	BufferSize	string	`json:"-" xml:"-" csv:"-"`
+}
+
+func init() {
+	ImportMap["device_sn"]   = "DeviceSN"
+	ImportMap["software_id"] = "SoftwareID"
+	ImportMap["product_ver"] = "ProductVer"
+	ImportMap["factory_sn"]  = "FactorySN"
+	ImportMap["buffer_size"] = "BufferSize"
+
+	ExportMap["DeviceSN"]    = "device_sn"
+	ExportMap["SoftwareID"]  = "software_id"
+	ExportMap["ProductVer"]  = "product_ver"
+	ExportMap["FactorySN"]   = "factory_sn"
+	ExportMap["BufferSize"]  = "buffer_size"
+}
+
+func NewDeviceInfo(d *Device) (i *DeviceInfo, errs []error) {
+
+	var e error
+
+	if i.DeviceSN, e = d.GetDeviceSN(); e != nil {errs = append(errs, e)}
+	if i.SoftwareID, e = d.GetSoftwareID(); e != nil {errs = append(errs, e)}
+	if i.ProductVer, e = d.GetProductVer(); e != nil {errs = append(errs, e)}
+	if i.FactorySN, e = d.GetFactorySN(); e != nil {errs = append(errs, e)}
+	if i.BufferSize, e = d.GetBufferSize(); e != nil {errs = append(errs, e)}
+
+	return i, errs
+}

@@ -1,17 +1,17 @@
 package main
 
 import (
-	"github.com/jscherff/gomagtek"
+	"github.com/jscherff/gocmdb/usbci/magtek"
 	"strings"
 	"fmt"
 )
 
-func reset(d *gomagtek.Device) (err error) {
+func reset(d *magtek.Device) (err error) {
 
 	switch {
 
 	case *fResetUsb:
-		err = d.UsbReset()
+		err = d.Reset()
 
 	case *fResetDev:
 		err = d.DeviceReset()
@@ -20,7 +20,7 @@ func reset(d *gomagtek.Device) (err error) {
 	return err
 }
 
-func report(d *gomagtek.Device) (err error) {
+func report(d *magtek.Device) (err error) {
 
 	r, err := d.Report(strings.Split(*fReportInclude, ","))
 
@@ -32,7 +32,7 @@ func report(d *gomagtek.Device) (err error) {
 	return err
 }
 
-func config(d *gomagtek.Device) (err error) {
+func config(d *magtek.Device) (err error) {
 
 	switch {
 

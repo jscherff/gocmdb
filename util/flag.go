@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/jscherff/gomagtek"
+	"github.com/jscherff/gocmdb/usbci/magtek"
 	"strings"
 	"strconv"
 	"flag"
@@ -105,15 +105,15 @@ var (
 
 func init() {
 
-	for _, f := range gomagtek.FieldFlags {
-		includeUsage += fmt.Sprintf("\n\t%q\t%s", f, gomagtek.FieldTitleMap[gomagtek.FlagFieldMap[f]])
+	for _, f := range magtek.FieldFlags {
+		includeUsage += fmt.Sprintf("\n\t%q\t%s", f, magtek.FieldTitleMap[magtek.FlagFieldMap[f]])
 	}
 
-	//fReportInclude = fsReport.String("include", strings.Join(gomagtek.FieldDefaults, ","), includeUsage)
+	//fReportInclude = fsReport.String("include", strings.Join(magtek.FieldDefaults, ","), includeUsage)
 	fReportInclude = fsReport.String("include", "", includeUsage)
 
-	for _, t := range gomagtek.FormatTypes {
-		formatUsage += fmt.Sprintf("\n\t%q\t%s", t, gomagtek.FormatTitle[t])
+	for _, t := range magtek.FormatTypes {
+		formatUsage += fmt.Sprintf("\n\t%q\t%s", t, magtek.FormatTitle[t])
 	}
 
 	fReportFormat = fsReport.String("format", "", formatUsage)

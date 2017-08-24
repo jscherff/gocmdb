@@ -14,7 +14,11 @@
 
 package magtek
 
-import "os"
+import (
+	"encoding/json"
+	"encoding/xml"
+	"os"
+)
 
 // See the following for tips on runtime manipulation of struct tags:
 // https://beta.golang.org/doc/go1.8#language
@@ -94,4 +98,14 @@ func NewDeviceInfo(d *Device) (ni *DeviceInfo, errs []error) {
 	if ni.BufferSize, e = d.GetBufferSize(); e != nil {errs = append(errs, e)}
 
 	return ni, errs
+}
+
+func (i *DeviceInfo) JSON(min bool) ([]byte, error) {
+	if min {return json.Marshal(DeviceInfoMin(*i))}
+	return json.Marshal(i)
+}
+
+func (i *DeviceInfo) XML(min bool) ([]byte, error) {
+	if min {return xml.Marshal(DeviceInfoMin(*i))}
+	return xml.Marshal(i)
 }

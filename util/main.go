@@ -1,6 +1,7 @@
 package main
 
 import (
+	//"github.com/jscherff/gocmdb/usbci"
 	"github.com/jscherff/gocmdb/usbci/magtek"
 	"github.com/google/gousb"
 	"flag"
@@ -60,6 +61,7 @@ func main() {
 		defer device.Close()
 		//device, err := usbci.NewDevice(device)
 		device, err := magtek.NewDevice(device)
+		fmt.Println(device)
 
 		if err != nil {
 			log.Fatalf("Error: %v", err); continue
@@ -67,6 +69,7 @@ func main() {
 
 
 		di, errs := magtek.NewDeviceInfo(device)
+		fmt.Println(di)
 
 		if len(errs) > 0 {
 			log.Fatalf("Errors encountered"); continue
@@ -80,7 +83,7 @@ func main() {
 
 		di.SoftwareID = ""
 */
-
+/*
 		b, _ := di.JSON(true)
 		fmt.Println(string(b) + "\n")
 
@@ -88,6 +91,15 @@ func main() {
 		fmt.Println(string(b) + "\n")
 
 		b, _ = di.FXML(true)
+		fmt.Println(string(b) + "\n")
+*/
+		b, _ := di.JSON(false)
+		fmt.Println(string(b) + "\n")
+
+		b, _ = di.XML(false)
+		fmt.Println(string(b) + "\n")
+
+		b, _ = di.FXML(false)
 		fmt.Println(string(b) + "\n")
 
 		os.Exit(0)

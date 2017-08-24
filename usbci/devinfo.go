@@ -14,7 +14,11 @@
 
 package usbci
 
-import "os"
+import (
+	"encoding/json"
+	"encoding/xml"
+	"os"
+)
 
 type DeviceInfo struct {
 	HostName	string
@@ -75,4 +79,14 @@ func NewDeviceInfo(d *Device) (ni *DeviceInfo, errs []error) {
 	if ni.DescriptSN, e = d.GetDescriptSN(); e != nil {errs = append(errs, e)}
 
 	return ni, errs
+}
+
+func (i *DeviceInfo) JSON(min bool) ([]byte, error) {
+	if min {return json.Marshal(DeviceInfoMin(*i))}
+	return json.Marshal(i)
+}
+
+func (i *DeviceInfo) XML(min bool) ([]byte, error) {
+	if min {return xml.Marshal(DeviceInfoMin(*i))}
+	return xml.Marshal(i)
 }

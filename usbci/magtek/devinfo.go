@@ -14,34 +14,12 @@
 
 package magtek
 
-import (
-	"github.com/jscherff/gocmdb/usbci"
-	"os"
-)
+import "os"
 
 // See the following for tips on runtime manipulation of struct tags:
 // https://beta.golang.org/doc/go1.8#language
 // https://play.golang.org/p/QNArOeqy94
 
-type DeviceInfo struct {
-	*usbci.DeviceInfo
-	DeviceSN	string
-	SoftwareID	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
-	ProductVer	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
-	FactorySN	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
-	BufferSize	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
-}
-
-type DeviceInfoMin struct {
-	*usbci.DeviceInfoMin
-	DeviceSN	string
-	SoftwareID	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
-	ProductVer	string	`json:"-" xml:"-" csv:"-"`
-	FactorySN	string	`json:"-" xml:"-" csv:"-"`
-	BufferSize	string	`json:"-" xml:"-" csv:"-"`
-}
-
-/*
 type DeviceInfo struct {
 	HostName	string
 	DeviceSN	string
@@ -87,44 +65,7 @@ type DeviceInfoMin struct {
 	MaxPktSize	string	`json:"-" xml:"-" csv:"-"`
 	BufferSize	string	`json:"-" xml:"-" csv:"-"`
 }
-*/
 
-func NewDeviceInfo(d *Device) (ni *DeviceInfo, errs []error) {
-
-	var e error
-	var ds, si, pv, fs, bs string
-
-	pi := new(usbci.DeviceInfo)
-
-	pi.VendorID = d.GetVendorID()
-	pi.ProductID = d.GetProductID()
-	pi.BusNumber = d.GetBusNumber()
-	pi.BusAddress = d.GetBusAddress()
-	pi.USBSpec = d.GetUSBSpec()
-	pi.USBClass = d.GetUSBClass()
-	pi.USBSubclass = d.GetUSBSubclass()
-	pi.USBProtocol = d.GetUSBProtocol()
-	pi.DeviceSpeed = d.GetDeviceSpeed()
-	pi.DeviceVer = d.GetDeviceVer()
-	pi.MaxPktSize = d.GetMaxPktSize()
-
-	if pi.HostName, e = os.Hostname(); e != nil {errs = append(errs, e)}
-	if pi.VendorName, e = d.GetVendorName(); e != nil {errs = append(errs, e)}
-	if pi.ProductName, e = d.GetProductName(); e != nil {errs = append(errs, e)}
-	if pi.DescriptSN, e = d.GetDescriptSN(); e != nil {errs = append(errs, e)}
-
-	if ds, e = d.GetDeviceSN(); e != nil {errs = append(errs, e)}
-	if si, e = d.GetSoftwareID(); e != nil {errs = append(errs, e)}
-	if pv, e = d.GetProductVer(); e != nil {errs = append(errs, e)}
-	if fs, e = d.GetFactorySN(); e != nil {errs = append(errs, e)}
-	if bs, e = d.GetBufferSize(); e != nil {errs = append(errs, e)}
-
-	ni = &DeviceInfo{pi, ds, si, pv, fs, bs}
-
-	return ni, errs
-}
-
-/*
 func NewDeviceInfo(d *Device) (ni *DeviceInfo, errs []error) {
 
 	var e error
@@ -154,4 +95,3 @@ func NewDeviceInfo(d *Device) (ni *DeviceInfo, errs []error) {
 
 	return ni, errs
 }
-*/

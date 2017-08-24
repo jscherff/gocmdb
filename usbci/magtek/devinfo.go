@@ -109,3 +109,32 @@ func (i *DeviceInfo) XML(min bool) ([]byte, error) {
 	if min {return xml.Marshal(DeviceInfoMin(*i))}
 	return xml.Marshal(i)
 }
+
+// func (i *DeviceInfo) IsEqual(j *DeviceInfo) (bool) {
+// See https://golang.org/pkg/reflect/#DeepEqual
+
+// func (i *DeviceInfo) CSV(min bool) ([]byte, error) {
+// See example at https://golang.org/pkg/reflect/#StructOf
+// See https://stackoverflow.com/questions/18926303/iterate-through-a-struct-in-go
+
+func StructToCSV (t interface{}) {
+	fmt.Printf("%v", reflect.ValueOf(t).Elem().FieldByName("A"))
+
+
+	v := reflect.ValueOf(t)
+
+    values := make([]interface{}, v.NumField())
+
+    for i := 0; i < v.NumField(); i++ {
+        values[i] = v.Field(i).Interface()
+    }
+
+    fmt.Println(values)
+}
+}
+
+func main() {
+	x := Info{"one", "two", "three", "four"}
+	fmt.Println(x)
+	Prune(&x)
+}

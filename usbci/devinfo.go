@@ -17,6 +17,8 @@ package usbci
 import (
 	"encoding/json"
 	"encoding/xml"
+	"encoding/csv"
+	"reflect"
 	"os"
 )
 

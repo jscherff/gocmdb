@@ -16,7 +16,10 @@ package gocmdb
 
 import (
 	"path/filepath"
+	"encoding/csv"
 	"runtime"
+	"reflect"
+	"bytes"
 	"fmt"
 )
 
@@ -32,4 +35,31 @@ func GetFunctionInfo() string {
 	}
 
 	return fmt.Sprintf("%s:%d: %s()", filepath.Base(file), line, function.Name())
+}
+
+// StructToCSV converts a single-tier struct to a CSV-formatted string.
+func StructToCSV (t interface{}) (s string, e error) {
+
+	v := reflect.ValueOf(t)
+
+	if v.Type().Kind() != reflect.Struct {
+		return s, fmt.Errorf("%s: kind is not 'struct'", gocmdb.GetFunctionInfo())
+	}
+
+	var data = make([][]string, 2)
+
+	for i := 0; i < v.NumField(); i++ {
+		//TODO: skip if fieled has tag `csv:"-"`
+		data[0] = append(data[0], v.Type().Field(i).Name)
+		data[1] = append(data[1], fmt.Sprintf("%v", v.Field(i).Interface()))
+	}
+
+	b := new(bytes.Buffer)
+	w := csv.NewWriter(b)
+	w.WriteAll(data)
+
+	e = w.Error()
+	s = b.String()
+
+	return s, e
 }

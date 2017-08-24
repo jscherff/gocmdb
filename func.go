@@ -19,6 +19,7 @@ import (
 	"encoding/csv"
 	"runtime"
 	"reflect"
+	"strings"
 	"bytes"
 	"fmt"
 )
@@ -43,15 +44,46 @@ func StructToCSV (t interface{}) (s string, e error) {
 	v := reflect.ValueOf(t)
 
 	if v.Type().Kind() != reflect.Struct {
-		return s, fmt.Errorf("%s: kind is not 'struct'", gocmdb.GetFunctionInfo())
+		return s, fmt.Errorf("%s: kind is not 'struct'", GetFunctionInfo())
 	}
 
 	var data = make([][]string, 2)
 
+	OUTER:
 	for i := 0; i < v.NumField(); i++ {
-		//TODO: skip if fieled has tag `csv:"-"`
-		data[0] = append(data[0], v.Type().Field(i).Name)
-		data[1] = append(data[1], fmt.Sprintf("%v", v.Field(i).Interface()))
+
+		fname := v.Type().Field(i).Name
+		fval := fmt.Sprintf("%v", v.Field(i).Interface())
+
+		// Process field tags. Function follows the same tag
+		// rules as encoding/xml and encoding/json, but only
+		// support modified field names, the '-' directive, 
+		// and the 'omitempty' directive.
+
+		ftag := v.Type().Field(i).Tag
+
+		if tvals, ok := ftag.Lookup("csv"); ok {
+
+			tval := strings.Split(tvals, ",")
+
+			switch {
+			case tval[0] == "":
+				break
+			case tval[0] == "-":
+				continue OUTER
+			default:
+				fname = tval[0]
+			}
+
+			for j := 1; i < len(tval); j++ {
+				if tval[j] == "omitempty" && len(fval) == 0 {
+					continue OUTER
+				}
+			}
+		}
+
+		data[0] = append(data[0], fname)
+		data[1] = append(data[1], fval)
 	}
 
 	b := new(bytes.Buffer)

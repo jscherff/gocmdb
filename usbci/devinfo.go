@@ -15,29 +15,29 @@
 package usbci
 
 import (
+	"github.com/jscherff/gocmdb"
 	"encoding/json"
 	"encoding/xml"
-	"encoding/csv"
 	"reflect"
 	"os"
 )
 
 type DeviceInfo struct {
 	HostName	string
-	VendorID	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
-	ProductID	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
-	VendorName	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
-	ProductName	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
-	DescriptSN	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
-	BusNumber	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
-	BusAddress	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
-	USBSpec		string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
-	USBClass	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
-	USBSubclass	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
-	USBProtocol	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
-	DeviceSpeed	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
-	DeviceVer	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
-	MaxPktSize	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
+	VendorID	string
+	ProductID	string
+	VendorName	string
+	ProductName	string
+	DescriptSN	string
+	BusNumber	string
+	BusAddress	string
+	USBSpec		string
+	USBClass	string
+	USBSubclass	string
+	USBProtocol	string
+	DeviceSpeed	string
+	DeviceVer	string
+	MaxPktSize	string
 }
 
 type DeviceInfoMin struct {
@@ -85,10 +85,37 @@ func NewDeviceInfo(d *Device) (ni *DeviceInfo, errs []error) {
 
 func (i *DeviceInfo) JSON(min bool) ([]byte, error) {
 	if min {return json.Marshal(DeviceInfoMin(*i))}
-	return json.Marshal(i)
+	return json.Marshal(*i)
 }
 
 func (i *DeviceInfo) XML(min bool) ([]byte, error) {
 	if min {return xml.Marshal(DeviceInfoMin(*i))}
-	return xml.Marshal(i)
+	return xml.Marshal(*i)
 }
+
+func (i *DeviceInfo) CSV(min bool) (string, error) {
+	if min {return gocmdb.StructToCSV(DeviceInfoMin(*i))}
+	return gocmdb.StructToCSV(*i)
+}
+
+func (i *DeviceInfo) Matches(t interface{}) (bool) {
+	return reflect.DeepEqual(i, t)
+}
+
+func (i *DeviceInfo) Copy(min bool) (ni *DeviceInfo, e error) {
+
+	ni = new(DeviceInfo)
+
+	if min {
+		b, e := json.Marshal(DeviceInfoMin(*i))
+		if e != nil {return nil, e}
+		e = json.Unmarshal(b, ni)
+		if e != nil {return nil, e}
+	} else {
+		*ni = *i
+	}
+
+	return ni, e
+}
+
+

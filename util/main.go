@@ -4,6 +4,7 @@ import (
 	//"github.com/jscherff/gocmdb/usbci"
 	"github.com/jscherff/gocmdb/usbci/magtek"
 	"github.com/google/gousb"
+	"encoding/json"
 	"flag"
 	"log"
 	"fmt"
@@ -61,7 +62,7 @@ func main() {
 		defer device.Close()
 		//device, err := usbci.NewDevice(device)
 		device, err := magtek.NewDevice(device)
-		fmt.Println(device)
+		fmt.Printf("%s\n\n", device)
 
 		if err != nil {
 			log.Fatalf("Error: %v", err); continue
@@ -69,7 +70,7 @@ func main() {
 
 
 		di, errs := magtek.NewDeviceInfo(device)
-		fmt.Println(di)
+		fmt.Printf("%v\n\n", di)
 
 		if len(errs) > 0 {
 			log.Fatalf("Errors encountered"); continue
@@ -90,18 +91,34 @@ func main() {
 		b, _ = di.XML(true)
 		fmt.Println(string(b) + "\n")
 
-		b, _ = di.FXML(true)
-		fmt.Println(string(b) + "\n")
+		s, _ := di.CSV(true)
+		fmt.Println(s + "\n")
 */
+		j := "{\"HostName\":\"John-SurfacePro\",\"DeviceSN\":\"B164F78\",\"VendorID\":\"0801\",\"ProductID\":\"0001\",\"SoftwareID\":\"21042840G01\",\"VendorName\":\"Mag-Tek\",\"ProductName\":\"USB Swipe Reader\",\"ProductVer\":\"V05\",\"FactorySN\":\"B164F78022713AA\",\"DescriptSN\":\"B164F78\",\"BusNumber\":\"1\",\"BusAddress\":\"4\",\"USBSpec\":\"1.10\",\"USBClass\":\"per-interface\",\"USBSubclass\":\"per-interface\",\"USBProtocol\":\"0\",\"DeviceSpeed\":\"full\",\"DeviceVer\":\"1.00\",\"MaxPktSize\":\"8\",\"BufferSize\":\"60\"}"
+
+		//j := "{\"HostName\":\"John-SurfacePro\",\"DeviceSN\":\"B164F78\",\"VendorID\":\"0801\",\"ProductID\":\"0001\",\"SoftwareID\":\"21042840G01\",\"ProductName\":\"USB Swipe Reader\",\"ProductVer\":\"V05\",\"FactorySN\":\"B164F78022713AA\",\"DescriptSN\":\"B164F78\",\"BusNumber\":\"1\",\"BusAddress\":\"4\",\"USBSpec\":\"1.10\",\"USBClass\":\"per-interface\",\"USBSubclass\":\"per-interface\",\"USBProtocol\":\"0\",\"DeviceSpeed\":\"full\",\"DeviceVer\":\"1.00\",\"MaxPktSize\":\"8\",\"BufferSize\":\"60\"}"
+
+		di2 := new(magtek.DeviceInfo)
+		if err = json.Unmarshal([]byte(j), &di2); err != nil {log.Fatalf("%v", err)}
+
+		di3, err := di.Copy(true)
+		fmt.Printf("A COPY:\n%s\n\n", di3)
+
+		di4, err := di3.Copy(false)
+		fmt.Printf("A COPY OF A COPY:\n%s\n\n", di4)
+
+		fmt.Println(di4.Matches(di3))
+
 		b, _ := di.JSON(false)
 		fmt.Println(string(b) + "\n")
 
 		b, _ = di.XML(false)
 		fmt.Println(string(b) + "\n")
 
-		b, _ = di.FXML(false)
-		fmt.Println(string(b) + "\n")
+		s, _ := di.CSV(false)
+		fmt.Println(s + "\n")
 
+		fmt.Println(di.Matches(di2))
 		os.Exit(0)
 
 		switch {

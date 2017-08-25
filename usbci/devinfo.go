@@ -122,5 +122,3 @@ func (i *DeviceInfo) Copy(min bool) (ni *DeviceInfo, e error) {
 
 	return ni, e
 }
-
-

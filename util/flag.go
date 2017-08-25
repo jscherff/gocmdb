@@ -1,75 +1,10 @@
 package main
 
 import (
-	"github.com/jscherff/gocmdb/usbci/magtek"
-	"strings"
-	"strconv"
+	"github.com/jscherff/gocmdb"
 	"flag"
 	"fmt"
 )
-
-// stringValue is a string flag value that knows if it has been set.
-type stringValue struct {
-	value string
-	set bool
-}
-
-func (sv *stringValue) String() string {
-	return sv.value
-}
-
-func (sv *stringValue) Set(s string) (err error) {
-	sv.value = s
-	sv.set = true
-	return err
-}
-
-func (sv *stringValue) IsSet() bool {
-	return sv.set
-}
-
-// intValue is an integer flag value that knows if it has been set.
-type intValue struct {
-	value int
-	set bool
-}
-
-func (iv *intValue) String() string {
-	return strconv.Itoa(iv.value)
-}
-
-func (iv *intValue) Set(s string) (err error) {
-	iv.value, err = strconv.Atoi(s)
-	iv.set = true
-	return err
-}
-
-func (iv *intValue) IsSet() bool {
-	return iv.set
-}
-
-// intValue is a string slice flag value that knows if it has been set.
-type reportFields struct {
-	values []string
-	set bool
-}
-
-func (rf *reportFields) String() string {
-	return strings.Join(rf.values, ",")
-}
-
-func (rf *reportFields) Set(s string) (err error) {
-	rf.values = strings.Split(s, ",")
-	rf.set = true
-	return err
-}
-
-func (rf *reportFields) IsSet() bool {
-	return rf.set
-}
-
-var includeUsage = "Include `<fields>` in report (comma-separated list):"
-var formatUsage = "Write report output in `<format>` format:"
 
 var (
 	fsMode = flag.NewFlagSet("mode", flag.ExitOnError)
@@ -80,20 +15,19 @@ var (
 
 var (
 	fsReport = flag.NewFlagSet("report", flag.ExitOnError)
-	fReportFile = fsReport.String ("file", "", "Write output to `<file>`")
-	fReportRaw = fsReport.Bool("raw", false, "Write output without headings")
+	fReportAll = fsReport.Bool("all", false, "Include all report fields")
+	fReportFile = fsReport.String ("file", "", "Write report to `<file>`")
 	fReportStdout = fsReport.Bool("stdout", false, "Write output to stdout")
 	fReportFormat *string
-	fReportInclude *string
 )
 
 var (
 	fsConfig = flag.NewFlagSet("config", flag.ExitOnError)
-	fConfigErase = fsConfig.Bool("erase", false, "Erase serial number")
-	fConfigEmpty = fsConfig.Bool("empty", true, "Set serial number ONLY if it's empty")
+	fConfigCopy = fsConfig.Bool("copy", false, "Copy factory serial number")
+	fConfigErase = fsConfig.Bool("erase", false, "Erase current serial number")
+	fConfigForce = fsConfig.Bool("force", false, "Force serial number change")
 	fConfigSet = fsConfig.String("set", "", "Set serial number to `<string>`")
-	fConfigUrl = fsConfig.String("url", "", "Set serial number from URL `<url>`")
-	fConfigCopy = fsConfig.Int("copy", 0, "Copy `<n>` characters of factory SN to device SN")
+	fConfigUrl = fsConfig.String("url", "", "Set serial number from `<url>`")
 
 )
 
@@ -104,17 +38,7 @@ var (
 )
 
 func init() {
-
-	for _, f := range magtek.FieldFlags {
-		includeUsage += fmt.Sprintf("\n\t%q\t%s", f, magtek.FieldTitleMap[magtek.FlagFieldMap[f]])
-	}
-
-	//fReportInclude = fsReport.String("include", strings.Join(magtek.FieldDefaults, ","), includeUsage)
-	fReportInclude = fsReport.String("include", "", includeUsage)
-
-	for _, t := range magtek.FormatTypes {
-		formatUsage += fmt.Sprintf("\n\t%q\t%s", t, magtek.FormatTitle[t])
-	}
-
-	fReportFormat = fsReport.String("format", "", formatUsage)
+	usage := "Report format `<format>`"
+	for k, v := range gocmdb.ReportFormats {usage += fmt.Sprintf("\n\t%q\t%s", k, v)}
+	fReportFormat = fsReport.String("format", "csv", usage)
 }

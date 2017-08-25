@@ -1,5 +1,3 @@
-package gocmdb
-
 // Copyright 2017 John Scherff
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,3 +11,11 @@ package gocmdb
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+package gocmdb
+
+var ReportFormats = map[string]string {
+	"csv":	"Comma-Separated Value format",
+	"xml":	"eXtensible Markup Language",
+	"json":	"JavaScript Object Notation",
+	"nvp":	"Name-Value Pair format"}

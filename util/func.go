@@ -2,62 +2,96 @@ package main
 
 import (
 	"github.com/jscherff/gocmdb/usbci/magtek"
-	"strings"
 	"fmt"
+	"os"
 )
 
-func reset(d *magtek.Device) (err error) {
+func reset(d *magtek.Device) (e error) {
 
 	switch {
 
 	case *fResetUsb:
-		err = d.Reset()
+		e = d.Reset()
 
 	case *fResetDev:
-		err = d.DeviceReset()
+		e = d.DeviceReset()
 	}
 
-	return err
+	return e
 }
 
-func report(d *magtek.Device) (err error) {
+func report(d *magtek.Device) (e error) {
 
-	r, err := d.Report(strings.Split(*fReportInclude, ","))
+	var r string
+	di, errs := magtek.NewDeviceInfo(d)
 
-	fmt.Println(r.CSV(false) + "\n")
-	fmt.Println(r.CSV(true) + "\n")
-	fmt.Println(r.NVP(false) + "\n")
-	fmt.Println(r.NVP(true) + "\n")
+	if len(errs) > 0 {
+		e = fmt.Errorf("Errors encountered getting device information")
+	} else {
 
-	return err
+		switch *fReportFormat {
+
+		case "csv":
+			r, e = di.CSV(*fReportAll)
+
+		case "nvp":
+			r, e = di.NVP(*fReportAll)
+
+		case "xml":
+			b, e := di.NVP(*fReportAll)
+			if e != nil {r = string(b)}
+
+		case "json":
+			b, e := di.JSON(*fReportAll)
+			if e != nil {r = string(b)}
+
+		default:
+			fmt.Fprintf(os.Stderr, "Invalid report format.\n")
+			fsReport.Usage()
+			os.Exit(1)
+		}
+	}
+
+	if e == nil {
+		switch {
+
+		case *fReportStdout:
+			fmt.Fprintf(os.Stdout, r)
+
+		case len(*fReportFile) > 0:
+			//TODO
+		}
+	}
+
+	return e
 }
 
-func config(d *magtek.Device) (err error) {
+func config(d *magtek.Device) (e error) {
+
+	s, e := d.GetDeviceSN()
+	if e != nil {return e}
 
 	switch {
 
 	case *fConfigErase:
-		err = d.EraseDeviceSN()
+		e = d.EraseDeviceSN()
+		fallthrough
 
-	case *fConfigEmpty:
-		if ln, err := d.GetDeviceSN(); len(ln) > 0 { return err }
-	}
+	case len(s) == 0 || *fConfigForce:
+		fallthrough
 
-	switch {
-
-	case *fConfigErase:
-		err = d.EraseDeviceSN()
+	case *fConfigCopy:
+		e = d.CopyFactorySN(7)
 
 	case len(*fConfigSet) > 0:
-		err = d.SetDeviceSN(*fConfigSet)
+		e = d.SetDeviceSN(*fConfigSet)
 
 	case len(*fConfigUrl) > 0:
-		//TODO: call function to fetch serail number from server
-		err = d.SetDeviceSN("24F0000")
+		e = d.SetDeviceSN("24F0000") //TODO: call server
 
-	case *fConfigCopy > 0:
-		err = d.CopyFactorySN(*fConfigCopy)
+	default:
+		//TODO
 	}
 
-	return err
+	return e
 }

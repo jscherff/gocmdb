@@ -23,39 +23,39 @@ import (
 )
 
 type DeviceInfo struct {
-	HostName	string
-	VendorID	string
-	ProductID	string
-	VendorName	string
-	ProductName	string
-	DescriptSN	string
-	BusNumber	string
-	BusAddress	string
-	USBSpec		string
-	USBClass	string
-	USBSubclass	string
-	USBProtocol	string
-	DeviceSpeed	string
-	DeviceVer	string
-	MaxPktSize	string
+	HostName	string	`csv:"hostname"`
+	VendorID	string	`csv:"vendor_id"`
+	ProductID	string	`csv:"product_id"`
+	VendorName	string	`csv:"vendor_name"`
+	ProductName	string	`csv:"product_name"`
+	DescriptSN	string	`csv:"descript_sn"`
+	BusNumber	string	`csv:"bus_number"`
+	BusAddress	string	`csv:"bus_address"`
+	USBSpec		string	`csv:"usb_spec"`
+	USBClass	string	`csv:"usb_class"`
+	USBSubclass	string	`csv:"usb_subclass"`
+	USBProtocol	string	`csv:"usb_protocol"`
+	DeviceSpeed	string	`csv:"device_speed"`
+	DeviceVer	string	`csv:"device_ver"`
+	MaxPktSize	string	`csv:"max_pkt_size"`
 }
 
 type DeviceInfoMin struct {
-	HostName	string
-	VendorID	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
-	ProductID	string	`json:",omitempty" xml:",omitempty" csv:",omitempty"`
-	VendorName	string	`json:"-" xml:"-" csv:"-"`
-	ProductName	string	`json:"-" xml:"-" csv:"-"`
-	DescriptSN	string	`json:"-" xml:"-" csv:"-"`
-	BusNumber	string	`json:"-" xml:"-" csv:"-"`
-	BusAddress	string	`json:"-" xml:"-" csv:"-"`
-	USBSpec		string	`json:"-" xml:"-" csv:"-"`
-	USBClass	string	`json:"-" xml:"-" csv:"-"`
-	USBSubclass	string	`json:"-" xml:"-" csv:"-"`
-	USBProtocol	string	`json:"-" xml:"-" csv:"-"`
-	DeviceSpeed	string	`json:"-" xml:"-" csv:"-"`
-	DeviceVer	string	`json:"-" xml:"-" csv:"-"`
-	MaxPktSize	string	`json:"-" xml:"-" csv:"-"`
+	HostName	string	`csv:"hostname"`
+	VendorID	string	`csv:"vendor_id"`
+	ProductID	string	`csv:"product_id"`
+	VendorName	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
+	ProductName	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
+	DescriptSN	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
+	BusNumber	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
+	BusAddress	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
+	USBSpec		string	`json:"-" xml:"-" csv:"-" nvp:"-"`
+	USBClass	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
+	USBSubclass	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
+	USBProtocol	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
+	DeviceSpeed	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
+	DeviceVer	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
+	MaxPktSize	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
 }
 
 func NewDeviceInfo(d *Device) (ni *DeviceInfo, errs []error) {
@@ -96,6 +96,11 @@ func (i *DeviceInfo) XML(min bool) ([]byte, error) {
 func (i *DeviceInfo) CSV(min bool) (string, error) {
 	if min {return gocmdb.StructToCSV(DeviceInfoMin(*i))}
 	return gocmdb.StructToCSV(*i)
+}
+
+func (i *DeviceInfo) NVP(min bool) (string, error) {
+	if min {return gocmdb.StructToNVP(DeviceInfoMin(*i))}
+	return gocmdb.StructToNVP(*i)
 }
 
 func (i *DeviceInfo) Matches(t interface{}) (bool) {

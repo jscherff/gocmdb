@@ -115,7 +115,10 @@ func main() {
 		b, _ = di.XML(false)
 		fmt.Println(string(b) + "\n")
 
-		s, _ := di.CSV(false)
+		s, _ := di.CSV(true)
+		fmt.Println(s + "\n")
+
+		s, _ = di.NVP(true)
 		fmt.Println(s + "\n")
 
 		fmt.Println(di.Matches(di2))

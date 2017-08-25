@@ -44,7 +44,7 @@ func StructToNVP (t interface{}) (s string, e error) {
 
 	if ssnvp, e := StructToSlice(t, "nvp"); e == nil {
 		for _, snvp := range ssnvp {
-			s += fmt.Sprintf("%s:%s\n", snvp[0], snvp[1])
+			s += fmt.Sprintf("%s: %s\n", snvp[0], snvp[1])
 		}
 	}
 

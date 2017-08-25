@@ -6,20 +6,6 @@ import (
 	"os"
 )
 
-func reset(d *magtek.Device) (e error) {
-
-	switch {
-
-	case *fResetUsb:
-		e = d.Reset()
-
-	case *fResetDev:
-		e = d.DeviceReset()
-	}
-
-	return e
-}
-
 func report(d *magtek.Device) (e error) {
 
 	var r string
@@ -32,18 +18,18 @@ func report(d *magtek.Device) (e error) {
 		switch *fReportFormat {
 
 		case "csv":
-			r, e = di.CSV(*fReportAll)
+			r, e = di.CSV(!*fReportAll)
 
 		case "nvp":
-			r, e = di.NVP(*fReportAll)
+			r, e = di.NVP(!*fReportAll)
 
 		case "xml":
-			b, e := di.NVP(*fReportAll)
-			if e != nil {r = string(b)}
+			b, e := di.NVP(!*fReportAll)
+			if e == nil {r = string(b)}
 
 		case "json":
-			b, e := di.JSON(*fReportAll)
-			if e != nil {r = string(b)}
+			b, e := di.JSON(!*fReportAll)
+			if e == nil {r = string(b)}
 
 		default:
 			fmt.Fprintf(os.Stderr, "Invalid report format.\n")
@@ -53,14 +39,21 @@ func report(d *magtek.Device) (e error) {
 	}
 
 	if e == nil {
+
 		switch {
+
+		case len(*fReportFile) > 0:
+			//TODO
 
 		case *fReportStdout:
 			fmt.Fprintf(os.Stdout, r)
 
-		case len(*fReportFile) > 0:
-			//TODO
+		default:
+			fmt.Fprintf(os.Stderr, "No report destination selected.\n")
+			fsReport.Usage()
+			os.Exit(1)
 		}
+
 	}
 
 	return e
@@ -77,8 +70,8 @@ func config(d *magtek.Device) (e error) {
 		e = d.EraseDeviceSN()
 		fallthrough
 
-	case len(s) == 0 || *fConfigForce:
-		fallthrough
+	case len(s) > 0 && !*fConfigForce:
+		fmt.Fprintf(os.Stderr, "Serial number already set. Exiting.\n")
 
 	case *fConfigCopy:
 		e = d.CopyFactorySN(7)
@@ -95,3 +88,18 @@ func config(d *magtek.Device) (e error) {
 
 	return e
 }
+
+func reset(d *magtek.Device) (e error) {
+
+	switch {
+
+	case *fResetUsb:
+		e = d.Reset()
+
+	case *fResetDev:
+		e = d.DeviceReset()
+	}
+
+	return e
+}
+

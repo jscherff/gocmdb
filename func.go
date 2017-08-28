@@ -38,55 +38,54 @@ func GetFunctionInfo() string {
 	return fmt.Sprintf("%s:%d: %s()", filepath.Base(file), line, function.Name())
 }
 
-// StructToNVP converts a single-tier struct to a string containing name-
-// value pairs separated by newlines.
-func StructToNVP (t interface{}) (s string, e error) {
+// ObjectToCSV converts a single-tier struct to a string suitable for writing
+// to a CSV file. For the csv package, we need to rearranage the elements from
+// an ordered list of {{name, value}, {name, value}, ...} to an ordered list
+// of {{name, name, ...}, {value, value, ...}}.
+func ObjectToCSV (t interface{}) (b []byte, e error) {
 
-	if ssnvp, e := StructToSlice(t, "nvp"); e == nil {
-		for _, snvp := range ssnvp {
-			s += fmt.Sprintf("%s: %s\n", snvp[0], snvp[1])
+	if ssi, e := ObjectToSlice(t, "csv"); e == nil {
+		ss := make([][]string, 2)
+		for _, si := range ssi {
+			 ss[NameIx] = append(ss[NameIx], si[NameIx])
+			 ss[ValueIx] = append(ss[ValueIx], si[ValueIx])
 		}
+		bb := new(bytes.Buffer)
+		cw := csv.NewWriter(bb)
+		cw.WriteAll(ss)
+		b, e = bb.Bytes(), cw.Error()
 	}
 
-	return s, e
+	return b, e
 }
 
-// StructToCSV converts a single-tier struct to a string suitable for writing
-// to a CSV file.
-func StructToCSV (t interface{}) (s string, e error) {
+// ObjectToNVP converts a single-tier struct to a string containing name-
+// value pairs separated by newlines.
+func ObjectToNVP (t interface{}) (b []byte, e error) {
 
-	ssnvp, e := StructToSlice(t, "csv")
-	if e != nil {return s, e}
-
-	// For the encoding/csv package, we need to rearranage the elements
-	// from an ordered list of {{name, value}, {name, value}, ...} to an
-	// ordered list of {{name, name, ...}, {value, value, ...}}.
-
-	ss := make([][]string, 2)
-
-	for _, snvp := range ssnvp {
-		for i, v := range snvp {ss[i] = append(ss[i], v)}
+	if ssi, e := ObjectToSlice(t, "nvp"); e == nil {
+		var s string
+		for _, si := range ssi {
+			s += fmt.Sprintf("%s:%s\n", si[NameIx], si[ValueIx])
+		}
+		b = []byte(s)
 	}
 
-	b := new(bytes.Buffer)
-	w := csv.NewWriter(b)
-	w.WriteAll(ss)
-
-	return b.String(), w.Error()
+	return b, e
 }
 
-// StructCompare compares the field count, order, names, and values of two
+// CompareObjects compares the field count, order, names, and values of two
 // structs. If the field count or order is different, the structs are not
 // comparable and the function returns an error. If the structs differ only
 // in field values, the function returns a list of differences.
-func StructCompare(a interface{}, b interface{}) (ss[][]string, e error) {
+func CompareObjects(a interface{}, b interface{}) (ss[][]string, e error) {
 
 	if reflect.DeepEqual(a, b) {return ss, e}
 
-	as, e := StructToSlice(a, "")
+	as, e := ObjectToSlice(a, "")
 	if e != nil {return ss, e}
 
-	bs, e := StructToSlice(b, "")
+	bs, e := ObjectToSlice(b, "")
 	if e != nil {return ss, e}
 
 	if al, bl := len(as), len(bs); al != bl {
@@ -107,13 +106,13 @@ func StructCompare(a interface{}, b interface{}) (ss[][]string, e error) {
 	return ss, e
 }
 
-// StructToSlice converts a single-tier struct into a slice of slices in the
+// ObjectToSlice converts a single-tier struct into a slice of slices in the
 // form {{name, value}, {name, value}, ...} for consumption by other methods.
 // The outer slice maintains the fields in the same order as the struct. The
 // tag parameter is the name of the struct tag to use for special processing.
 // The primary purpose of this function is to offload tag processing for other
 // functions.
-func StructToSlice(t interface{}, tag string) (ss[][]string, e error) {
+func ObjectToSlice(t interface{}, tag string) (ss[][]string, e error) {
 
 	v := reflect.ValueOf(t)
 

@@ -97,14 +97,14 @@ func (i *DeviceInfo) XML(min bool) ([]byte, error) {
 	return xml.Marshal(*i)
 }
 
-func (i *DeviceInfo) CSV(min bool) (string, error) {
-	if min {return gocmdb.StructToCSV(DeviceInfoMin(*i))}
-	return gocmdb.StructToCSV(*i)
+func (i *DeviceInfo) CSV(min bool) ([]byte, error) {
+	if min {return gocmdb.ObjectToCSV(DeviceInfoMin(*i))}
+	return gocmdb.ObjectToCSV(*i)
 }
 
-func (i *DeviceInfo) NVP(min bool) (string, error) {
-	if min {return gocmdb.StructToNVP(DeviceInfoMin(*i))}
-	return gocmdb.StructToNVP(*i)
+func (i *DeviceInfo) NVP(min bool) ([]byte, error) {
+	if min {return gocmdb.ObjectToNVP(DeviceInfoMin(*i))}
+	return gocmdb.ObjectToNVP(*i)
 }
 
 func (i *DeviceInfo) Matches(t interface{}) (bool) {

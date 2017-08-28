@@ -81,8 +81,6 @@ func StructToCSV (t interface{}) (s string, e error) {
 // in field values, the function returns a list of differences.
 func StructCompare(a interface{}, b interface{}) (ss[][]string, e error) {
 
-	var iName, iValue int = 0, 1
-
 	if reflect.DeepEqual(a, b) {return ss, e}
 
 	as, e := StructToSlice(a, "")
@@ -97,12 +95,12 @@ func StructCompare(a interface{}, b interface{}) (ss[][]string, e error) {
 
 	for i := 0; i < len(as); i++ {
 
-		if as[i][iName] != bs[i][iName] {
-			return ss, fmt.Errorf("field name mismatch: %q != %q", i, as[i][iName], bs[i][iName])
+		if as[i][NameIx] != bs[i][NameIx] {
+			return ss, fmt.Errorf("field name mismatch: %q != %q", i, as[i][NameIx], bs[i][NameIx])
 		}
 
-		if as[i][iValue] != bs[i][iValue] {
-			ss = append(ss, []string{as[i][iName], as[i][iValue], bs[i][iValue]})
+		if as[i][ValueIx] != bs[i][ValueIx] {
+			ss = append(ss, []string{as[i][NameIx], as[i][ValueIx], bs[i][ValueIx]})
 		}
 	}
 

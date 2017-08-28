@@ -14,9 +14,7 @@
 
 package gocmdb
 
-var ReportFormats = [][]string {
-	[]string {"csv",  "Comma-Separated Value format"},
-	[]string {"nvp",  "Name-Value Pair format"},
-	[]string {"xml",  "eXtensible Markup Language"},
-	[]string {"json", "JavaScript Object Notation"},
-}
+const (
+	NameIx int = 0
+	ValueIx int = 1
+)

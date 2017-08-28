@@ -23,41 +23,43 @@ import (
 )
 
 type DeviceInfo struct {
-	HostName	string	`json:"hostname" csv:"hostname"`
-	VendorID	string	`json:"vendor_id" csv:"vendor_id"`
-	ProductID	string	`json:"product_id" csv:"product_id"`
-	VendorName	string	`json:"vendor_name" csv:"vendor_name"`
-	ProductName	string	`json:"product_name" csv:"product_name"`
-	SerialNum	string	`json:"serial_num" csv:"serial_num"`
-	DescriptSN	string	`json:"descriptor_sn" csv:"descriptor_sn"`
-	BusNumber	string	`json:"bus_number" csv:"bus_number"`
-	BusAddress	string	`json:"bus_address" csv:"bus_address"`
-	USBSpec		string	`json:"usb_spec" csv:"usb_spec"`
-	USBClass	string	`json:"usb_class" csv:"usb_class"`
-	USBSubclass	string	`json:"usb_subclass" csv:"usb_subclass"`
-	USBProtocol	string	`json:"usb_protocol" csv:"usb_protocol"`
-	DeviceSpeed	string	`json:"device_speed" csv:"device_speed"`
-	DeviceVer	string	`json:"device_ver" csv:"device_ver"`
-	MaxPktSize	string	`json:"max_pkt_size" csv:"max_pkt_size"`
+	HostName	string		`json:"hostname" csv:"hostname"`
+	VendorID	string		`json:"vendor_id" csv:"vendor_id"`
+	ProductID	string		`json:"product_id" csv:"product_id"`
+	VendorName	string		`json:"vendor_name" csv:"vendor_name"`
+	ProductName	string		`json:"product_name" csv:"product_name"`
+	SerialNum	string		`json:"serial_num" csv:"serial_num"`
+	DescriptSN	string		`json:"descriptor_sn" csv:"descriptor_sn"`
+	BusNumber	string		`json:"bus_number" csv:"bus_number"`
+	BusAddress	string		`json:"bus_address" csv:"bus_address"`
+	USBSpec		string		`json:"usb_spec" csv:"usb_spec"`
+	USBClass	string		`json:"usb_class" csv:"usb_class"`
+	USBSubclass	string		`json:"usb_subclass" csv:"usb_subclass"`
+	USBProtocol	string		`json:"usb_protocol" csv:"usb_protocol"`
+	DeviceSpeed	string		`json:"device_speed" csv:"device_speed"`
+	DeviceVer	string		`json:"device_ver" csv:"device_ver"`
+	MaxPktSize	string		`json:"max_pkt_size" csv:"max_pkt_size"`
+	Deltas		[][]string	`json:"deltas" csv:"-" nvp:"-"`
 }
 
 type DeviceInfoMin struct {
-	HostName	string	`json:"hostname" csv:"hostname"`
-	VendorID	string	`json:"vendor_id" csv:"vendor_id"`
-	ProductID	string	`json:"product_id" csv:"product_id"`
-	VendorName	string	`json:"vendor_name" csv: "vendor_name"`
-	ProductName	string	`json:"product_name" csv: "product_name"`
-	SerialNum	string	`json:"serial_num" csv:"serial_num"`
-	DescriptSN	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
-	BusNumber	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
-	BusAddress	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
-	USBSpec		string	`json:"-" xml:"-" csv:"-" nvp:"-"`
-	USBClass	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
-	USBSubclass	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
-	USBProtocol	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
-	DeviceSpeed	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
-	DeviceVer	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
-	MaxPktSize	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
+	HostName	string		`json:"hostname" csv:"hostname"`
+	VendorID	string		`json:"vendor_id" csv:"vendor_id"`
+	ProductID	string		`json:"product_id" csv:"product_id"`
+	VendorName	string		`json:"vendor_name" csv: "vendor_name"`
+	ProductName	string		`json:"product_name" csv: "product_name"`
+	SerialNum	string		`json:"serial_num" csv:"serial_num"`
+	DescriptSN	string		`json:"-" xml:"-" csv:"-" nvp:"-"`
+	BusNumber	string		`json:"-" xml:"-" csv:"-" nvp:"-"`
+	BusAddress	string		`json:"-" xml:"-" csv:"-" nvp:"-"`
+	USBSpec		string		`json:"-" xml:"-" csv:"-" nvp:"-"`
+	USBClass	string		`json:"-" xml:"-" csv:"-" nvp:"-"`
+	USBSubclass	string		`json:"-" xml:"-" csv:"-" nvp:"-"`
+	USBProtocol	string		`json:"-" xml:"-" csv:"-" nvp:"-"`
+	DeviceSpeed	string		`json:"-" xml:"-" csv:"-" nvp:"-"`
+	DeviceVer	string		`json:"-" xml:"-" csv:"-" nvp:"-"`
+	MaxPktSize	string		`json:"-" xml:"-" csv:"-" nvp:"-"`
+	Deltas		[][]string	`json:"deltas" csv:"-" nvp:"-"`
 }
 
 func NewDeviceInfo(d *Device) (ni *DeviceInfo, errs []error) {
@@ -87,6 +89,12 @@ func NewDeviceInfo(d *Device) (ni *DeviceInfo, errs []error) {
 	return ni, errs
 }
 
+func GetDeviceInfo(fn string) (i *DeviceInfo, e error) {
+	i = new(DeviceInfo)
+	e = gocmdb.RestoreObject(i, fn)
+	return i, e
+}
+
 func (i *DeviceInfo) JSON(min bool) ([]byte, error) {
 	if min {return json.Marshal(DeviceInfoMin(*i))}
 	return json.Marshal(*i)
@@ -105,6 +113,11 @@ func (i *DeviceInfo) CSV(min bool) ([]byte, error) {
 func (i *DeviceInfo) NVP(min bool) ([]byte, error) {
 	if min {return gocmdb.ObjectToNVP(DeviceInfoMin(*i))}
 	return gocmdb.ObjectToNVP(*i)
+}
+
+func (i *DeviceInfo) Save(fn string, min bool) (error) {
+	if min {return gocmdb.SaveObject(DeviceInfoMin(*i), fn)}
+	return gocmdb.SaveObject(*i, fn)
 }
 
 func (i *DeviceInfo) Matches(t interface{}) (bool) {

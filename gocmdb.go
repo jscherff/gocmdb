@@ -16,12 +16,14 @@ package gocmdb
 
 import (
 	"path/filepath"
+	"encoding/json"
 	"encoding/csv"
 	"runtime"
 	"reflect"
 	"strings"
 	"bytes"
 	"fmt"
+	"os"
 )
 
 var ReportFormats = [][]string {
@@ -79,6 +81,34 @@ func ObjectToNVP (t interface{}) (b []byte, e error) {
 	}
 
 	return b, e
+}
+
+// SaveObject persists an object to a JSON file.
+func SaveObject(t interface{}, fn string) (e error) {
+
+	fh, e := os.Create(fn)
+	defer fh.Close()
+
+	if e == nil {
+		je := json.NewEncoder(fh)
+		e = je.Encode(&t)
+	}
+
+	return e
+}
+
+// RestoreObject restores an object from a JSON file.
+func RestoreObject(t interface{}, fn string) (e error) {
+
+	fh, e := os.Open(fn)
+	defer fh.Close()
+
+	if e == nil {
+		jd := json.NewDecoder(fh)
+		e = jd.Decode(&t)
+	}
+
+	return e
 }
 
 // CompareObjects compares the field count, order, names, and values of two

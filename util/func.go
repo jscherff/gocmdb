@@ -24,7 +24,7 @@ func report(d *magtek.Device) (e error) {
 			r, e = di.NVP(!*fReportAll)
 
 		case "xml":
-			b, e := di.NVP(!*fReportAll)
+			b, e := di.XML(!*fReportAll)
 			if e == nil {r = string(b)}
 
 		case "json":

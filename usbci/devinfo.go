@@ -23,27 +23,27 @@ import (
 )
 
 type DeviceInfo struct {
-	HostName	string	`csv:"hostname"`
-	VendorID	string	`csv:"vendor_id"`
-	ProductID	string	`csv:"product_id"`
-	VendorName	string	`csv:"vendor_name"`
-	ProductName	string	`csv:"product_name"`
-	DescriptSN	string	`csv:"descript_sn"`
-	BusNumber	string	`csv:"bus_number"`
-	BusAddress	string	`csv:"bus_address"`
-	USBSpec		string	`csv:"usb_spec"`
-	USBClass	string	`csv:"usb_class"`
-	USBSubclass	string	`csv:"usb_subclass"`
-	USBProtocol	string	`csv:"usb_protocol"`
-	DeviceSpeed	string	`csv:"device_speed"`
-	DeviceVer	string	`csv:"device_ver"`
-	MaxPktSize	string	`csv:"max_pkt_size"`
+	HostName	string	`json:"hostname" csv:"hostname"`
+	VendorID	string	`json:"vendor_id" csv:"vendor_id"`
+	ProductID	string	`json:"product_id" csv:"product_id"`
+	VendorName	string	`json:"vendor_name" csv:"vendor_name"`
+	ProductName	string	`json:"product_name" csv:"product_name"`
+	DescriptSN	string	`json:"descript_sn" csv:"descript_sn"`
+	BusNumber	string	`json:"bus_number" csv:"bus_number"`
+	BusAddress	string	`json:"bus_address" csv:"bus_address"`
+	USBSpec		string	`json:"usb_spec" csv:"usb_spec"`
+	USBClass	string	`json:"usb_class" csv:"usb_class"`
+	USBSubclass	string	`json:"usb_subclass" csv:"usb_subclass"`
+	USBProtocol	string	`json:"usb_protocol" csv:"usb_protocol"`
+	DeviceSpeed	string	`json:"device_speed" csv:"device_speed"`
+	DeviceVer	string	`json:"device_ver" csv:"device_ver"`
+	MaxPktSize	string	`json:"max_pkt_size" csv:"max_pkt_size"`
 }
 
 type DeviceInfoMin struct {
-	HostName	string	`csv:"hostname"`
-	VendorID	string	`csv:"vendor_id"`
-	ProductID	string	`csv:"product_id"`
+	HostName	string	`json:"hostname" csv:"hostname"`
+	VendorID	string	`json:"vendor_id" csv:"vendor_id"`
+	ProductID	string	`json:"product_id" csv:"product_id"`
 	VendorName	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
 	ProductName	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
 	DescriptSN	string	`json:"-" xml:"-" csv:"-" nvp:"-"`

@@ -75,6 +75,40 @@ func StructToCSV (t interface{}) (s string, e error) {
 	return b.String(), w.Error()
 }
 
+// StructCompare compares the field count, order, names, and values of two
+// structs. If the field count or order is different, the structs are not
+// comparable and the function returns an error. If the structs differ only
+// in field values, the function returns a list of differences.
+func StructCompare(a interface{}, b interface{}) (ss[][]string, e error) {
+
+	var iName, iValue int = 0, 1
+
+	if reflect.DeepEqual(a, b) {return ss, e}
+
+	as, e := StructToSlice(a, "")
+	if e != nil {return ss, e}
+
+	bs, e := StructToSlice(b, "")
+	if e != nil {return ss, e}
+
+	if al, bl := len(as), len(bs); al != bl {
+		return ss, fmt.Errorf("field count mismatch: %d != %d", al, bl)
+	}
+
+	for i := 0; i < len(as); i++ {
+
+		if as[i][iName] != bs[i][iName] {
+			return ss, fmt.Errorf("field name mismatch: %q != %q", i, as[i][iName], bs[i][iName])
+		}
+
+		if as[i][iValue] != bs[i][iValue] {
+			ss = append(ss, []string{as[i][iName], as[i][iValue], bs[i][iValue]})
+		}
+	}
+
+	return ss, e
+}
+
 // StructToSlice converts a single-tier struct into a slice of slices in the
 // form {{name, value}, {name, value}, ...} for consumption by other methods.
 // The outer slice maintains the fields in the same order as the struct. The

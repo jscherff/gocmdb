@@ -27,38 +27,38 @@ import (
 // https://play.golang.org/p/QNArOeqy94
 
 type DeviceInfo struct {
-	HostName	string	`csv:"hostname"`
-	DeviceSN	string	`csv:"device_sn"`
-	VendorID	string	`csv:"vendor_id"`
-	ProductID	string	`csv:"product_id"`
-	SoftwareID	string	`csv:"software_id"`
-	VendorName	string	`csv:"vendor_name"`
-	ProductName	string	`csv:"product_name"`
-	ProductVer	string	`csv:"product_ver"`
-	FactorySN	string	`csv:"factory_sn"`
-	DescriptSN	string	`csv:"descript_sn"`
-	BusNumber	string	`csv:"bus_number"`
-	BusAddress	string	`csv:"bus_address"`
-	USBSpec		string	`csv:"usb_spec"`
-	USBClass	string	`csv:"usb_class"`
-	USBSubclass	string	`csv:"usb_subclass"`
-	USBProtocol	string	`csv:"usb_protocol"`
-	DeviceSpeed	string	`csv:"device_speed"`
-	DeviceVer	string	`csv:"device_ver"`
-	MaxPktSize	string	`csv:"max_pkt_size"`
-	BufferSize	string	`csv:"buffer_size"`
+	HostName	string	`json:"hostname" csv:"hostname"`
+	DeviceSN	string	`json:"device_sn" csv:"device_sn"`
+	VendorID	string	`json:"vendor_id" csv:"vendor_id"`
+	ProductID	string	`json:"product_id" csv:"product_id"`
+	SoftwareID	string	`json:"software_id" csv:"software_id"`
+	ProductVer	string	`json:"product_ver" csv:"product_ver"`
+	FactorySN	string	`json:"factory_sn" csv:"factory_sn"`
+	VendorName	string	`json:"vendor_name" csv:"vendor_name"`
+	ProductName	string	`json:"product_name" csv:"product_name"`
+	DescriptSN	string	`json:"descript_sn" csv:"descript_sn"`
+	BusNumber	string	`json:"bus_number" csv:"bus_number"`
+	BusAddress	string	`json:"bus_address" csv:"bus_address"`
+	USBSpec		string	`json:"usb_spec" csv:"usb_spec"`
+	USBClass	string	`json:"usb_class" csv:"usb_class"`
+	USBSubclass	string	`json:"usb_subclass" csv:"usb_subclass"`
+	USBProtocol	string	`json:"usb_protocol" csv:"usb_protocol"`
+	DeviceSpeed	string	`json:"device_speed" csv:"device_speed"`
+	DeviceVer	string	`json:"device_ver" csv:"device_ver"`
+	MaxPktSize	string	`json:"max_pkt_size" csv:"max_pkt_size"`
+	BufferSize	string	`json:"buffer_size" csv:"buffer_size"`
 }
 
 type DeviceInfoMin struct {
-	HostName	string	`csv:"hostname"`
-	DeviceSN	string	`csv:"device_sn"`
-	VendorID	string	`csv:"vendor_id"`
-	ProductID	string	`csv:"product_id"`
-	SoftwareID	string	`csv:"software_id,omitempty"`
+	HostName	string	`json:"hostname" csv:"hostname"`
+	DeviceSN	string	`json:"device_sn" csv:"device_sn"`
+	VendorID	string	`json:"vendor_id" csv:"vendor_id"`
+	ProductID	string	`json:"product_id" csv:"product_id"`
+	SoftwareID	string	`json:"software_id" csv:"software_id`
+	ProductVer	string	`json:"product_ver" csv:"product_ver"`
+	FactorySN	string	`json:"factory_sn" csv:"factory_sn"`
 	VendorName	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
 	ProductName	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
-	ProductVer	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
-	FactorySN	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
 	DescriptSN	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
 	BusNumber	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
 	BusAddress	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
@@ -91,11 +91,11 @@ func NewDeviceInfo(d *Device) (ni *DeviceInfo, errs []error) {
 
 	if ni.HostName, e = os.Hostname(); e != nil {errs = append(errs, e)}
 	if ni.DeviceSN, e = d.GetDeviceSN(); e != nil {errs = append(errs, e)}
+	if ni.ProductVer, e = d.GetProductVer(); e != nil {errs = append(errs, e)}
 	if ni.SoftwareID, e = d.GetSoftwareID(); e != nil {errs = append(errs, e)}
+	if ni.FactorySN, e = d.GetFactorySN(); e != nil {errs = append(errs, e)}
 	if ni.VendorName, e = d.GetVendorName(); e != nil {errs = append(errs, e)}
 	if ni.ProductName, e = d.GetProductName(); e != nil {errs = append(errs, e)}
-	if ni.ProductVer, e = d.GetProductVer(); e != nil {errs = append(errs, e)}
-	if ni.FactorySN, e = d.GetFactorySN(); e != nil {errs = append(errs, e)}
 	if ni.DescriptSN, e = d.GetDescriptSN(); e != nil {errs = append(errs, e)}
 	if ni.BufferSize, e = d.GetBufferSize(); e != nil {errs = append(errs, e)}
 

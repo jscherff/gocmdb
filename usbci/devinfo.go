@@ -28,7 +28,8 @@ type DeviceInfo struct {
 	ProductID	string	`json:"product_id" csv:"product_id"`
 	VendorName	string	`json:"vendor_name" csv:"vendor_name"`
 	ProductName	string	`json:"product_name" csv:"product_name"`
-	DescriptSN	string	`json:"descript_sn" csv:"descript_sn"`
+	SerialNum	string	`json:"serial_num" csv:"serial_num"`
+	DescriptSN	string	`json:"descriptor_sn" csv:"descriptor_sn"`
 	BusNumber	string	`json:"bus_number" csv:"bus_number"`
 	BusAddress	string	`json:"bus_address" csv:"bus_address"`
 	USBSpec		string	`json:"usb_spec" csv:"usb_spec"`
@@ -44,8 +45,9 @@ type DeviceInfoMin struct {
 	HostName	string	`json:"hostname" csv:"hostname"`
 	VendorID	string	`json:"vendor_id" csv:"vendor_id"`
 	ProductID	string	`json:"product_id" csv:"product_id"`
-	VendorName	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
-	ProductName	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
+	VendorName	string	`json:"vendor_name" csv: "vendor_name"`
+	ProductName	string	`json:"product_name" csv: "product_name"`
+	SerialNum	string	`json:"serial_num" csv:"serial_num"`
 	DescriptSN	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
 	BusNumber	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
 	BusAddress	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
@@ -79,6 +81,8 @@ func NewDeviceInfo(d *Device) (ni *DeviceInfo, errs []error) {
 	if ni.VendorName, e = d.GetVendorName(); e != nil {errs = append(errs, e)}
 	if ni.ProductName, e = d.GetProductName(); e != nil {errs = append(errs, e)}
 	if ni.DescriptSN, e = d.GetDescriptSN(); e != nil {errs = append(errs, e)}
+
+	ni.SerialNum = ni.DescriptSN
 
 	return ni, errs
 }

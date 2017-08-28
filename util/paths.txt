@@ -1,2 +1,0 @@
-Serial File:	C:\Windows\24HourFitness\Utils\usb_serial.txt
-Log File:	C:\Windows\24HourFitness\Utils\usb_log.txt

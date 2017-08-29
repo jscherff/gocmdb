@@ -70,7 +70,7 @@ func NewDeviceDescriptor(d *Device) (dd *DeviceDescriptor, err error) {
 			data[16],
 			data[17]}
 	} else {
-		err = fmt.Errorf("%s: %v", gocmdb.GetFunctionInfo(), err)
+		err = fmt.Errorf("%s: %v", gocmdb.FunctionInfo(), err)
 	}
 
 	return dd, err
@@ -114,7 +114,7 @@ func NewConfigDescriptor(d *Device) (cd *ConfigDescriptor, err error) {
 			data[7],
 			data[8]}
 	} else {
-		err = fmt.Errorf("%s: %v", gocmdb.GetFunctionInfo(), err)
+		err = fmt.Errorf("%s: %v", gocmdb.FunctionInfo(), err)
 	}
 
 	return cd, err

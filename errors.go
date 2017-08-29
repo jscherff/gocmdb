@@ -14,9 +14,25 @@
 
 package gocmdb
 
-var ReportFormats = [][]string {
-	[]string {"csv",  "Comma-Separated Value format"},
-	[]string {"nvp",  "Name-Value Pair format"},
-	[]string {"xml",  "eXtensible Markup Language"},
-	[]string {"json", "JavaScript Object Notation"},
+import (
+	"strings"
+	"fmt"
+)
+
+// GetterError holds a collection of errors encountered when calling several
+// getter methods while populating data structures.
+type GetterError struct {
+	Getters	[]string
+	Errors	[]error
+}
+
+// Add adds a new getter error to GetterError.
+func (e *GetterError) Add(gs string, ge error) {
+	e.Getters = append(e.Getters, gs)
+	e.Errors = append(e.Errors, ge)
+}
+
+// Error implements the Error method of the error interface.
+func (e *GetterError) Error() (s string) {
+	return fmt.Sprintf("getter errors: %s\n", strings.Join(e.Getters, ", "))
 }

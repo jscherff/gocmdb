@@ -27,9 +27,9 @@ import (
 // required by the device for vendor commands sent via control transfer.
 type Device struct {
 	*gousb.Device
-	ManufacturerIndex int	// Index of Manufacturer String Descriptor
-	ProductIndex int	// Index of Product String Descriptor
-	SerialIndex int		// Index of Serial Number String Descriptor
+	manufacturerIx int	// Index of Manufacturer String Descriptor
+	productIx int		// Index of Product String Descriptor
+	serialIx int		// Index of Serial Number String Descriptor
 }
 
 // NewDevice constructs a new Device.
@@ -40,92 +40,92 @@ func NewDevice(d *gousb.Device) (*Device, error) {
 	dd, err := NewDeviceDescriptor(nd)
 
 	if err == nil {
-		nd.ManufacturerIndex = int(dd.ManufacturerIndex)
-		nd.ProductIndex = int(dd.ProductIndex)
-		nd.SerialIndex = int(dd.SerialIndex)
+		nd.manufacturerIx = int(dd.ManufacturerIndex)
+		nd.productIx = int(dd.ProductIndex)
+		nd.serialIx = int(dd.SerialIndex)
 	}
 
 	return nd, err
 }
 
-// GetBusNumber retrieves the USB bus number of the device.
-func (d *Device) GetBusNumber() string {
+// BusNumber retrieves the USB bus number of the device.
+func (d *Device) BusNumber() string {
 	return strconv.Itoa(d.Desc.Bus)
 }
 
-// GetBusAddress retrieves address of the device on the USB bus.
-func (d *Device) GetBusAddress() string {
+// BusAddress retrieves address of the device on the USB bus.
+func (d *Device) BusAddress() string {
 	return strconv.Itoa(d.Desc.Address)
 }
 
-// GetDeviceSpeed retrieves the negotiated operating speed of the device.
-func (d *Device) GetDeviceSpeed() string {
+// DeviceSpeed retrieves the negotiated operating speed of the device.
+func (d *Device) DeviceSpeed() string {
 	return d.Desc.Speed.String()
 }
 
-// GetUSBSpec retrieves the USB specification release number of the device.
-func (d *Device) GetUSBSpec() string {
+// USBSpec retrieves the USB specification release number of the device.
+func (d *Device) USBSpec() string {
 	return d.Desc.Spec.String()
 }
 
-// GetDeviceVer retrieves the major/minor version number ofthe device.
-func (d *Device) GetDeviceVer() string {
+// DeviceVer retrieves the major/minor version number ofthe device.
+func (d *Device) DeviceVer() string {
 	return d.Desc.Device.String()
 }
 
 // GetVendorId retrieves the USB vendor ID of the device.
-func (d *Device) GetVendorID() string {
+func (d *Device) VendorID() string {
 	return d.Desc.Vendor.String()
 }
 
-// GetProductID retrieves the USB product ID of the device.
-func (d *Device) GetProductID() string {
+// ProductID retrieves the USB product ID of the device.
+func (d *Device) ProductID() string {
 	return d.Desc.Product.String()
 }
 
-// GetUSBClass retrieves the USB class of the device.
-func (d *Device) GetUSBClass() string {
+// USBClass retrieves the USB class of the device.
+func (d *Device) USBClass() string {
 	return d.Desc.Class.String()
 }
 
-// GetUSBSubclass retrieves the USB subclass of the device.
-func (d *Device) GetUSBSubclass() string {
+// USBSubclass retrieves the USB subclass of the device.
+func (d *Device) USBSubclass() string {
 	return d.Desc.SubClass.String()
 }
 
-// GetUSBProtocol retrieves the USB protocol of the device.
-func (d *Device) GetUSBProtocol() string {
+// USBProtocol retrieves the USB protocol of the device.
+func (d *Device) USBProtocol() string {
 	return d.Desc.Protocol.String()
 }
 
-// GetMaxPktSize retrieves the maximum size of the control transfer.
-func (d *Device) GetMaxPktSize() string {
+// MaxPktSize retrieves the maximum size of the control transfer.
+func (d *Device) MaxPktSize() string {
 	return strconv.Itoa(d.Desc.MaxControlPacketSize)
 }
 
-// GetVendorName retrieves the manufacturer name from device descriptor.
-func (d *Device) GetVendorName() (value string, err error) {
+// VendorName retrieves the manufacturer name from device descriptor.
+func (d *Device) VendorName() (value string, err error) {
 
-	if d.ManufacturerIndex > 0 {
-		value, err = d.GetStringDescriptor(d.ManufacturerIndex)
+	if d.manufacturerIx > 0 {
+		value, err = d.GetStringDescriptor(d.manufacturerIx)
 	}
 
 	if err != nil {
-		err = fmt.Errorf("%s: %v", gocmdb.GetFunctionInfo(), err)
+		err = fmt.Errorf("%s: %v", gocmdb.FunctionInfo(), err)
 	}
 
 	return value, err
 }
 
-// GetProductName retrieves the product name from device descriptor.
-func (d *Device) GetProductName() (value string, err error) {
+// ProductName retrieves the product name from device descriptor.
+func (d *Device) ProductName() (value string, err error) {
 
-	if d.ProductIndex > 0 {
-		value, err = d.GetStringDescriptor(d.ProductIndex)
+	if d.productIx > 0 {
+		value, err = d.GetStringDescriptor(d.productIx)
 	}
 
 	if err != nil {
-		err = fmt.Errorf("%s: %v", gocmdb.GetFunctionInfo(), err)
+		err = fmt.Errorf("%s: %v", gocmdb.FunctionInfo(), err)
 	}
 
 	return value, err
@@ -135,14 +135,14 @@ func (d *Device) GetProductName() (value string, err error) {
 // device descriptor. Changes made to the serial number on the device using a
 // control transfer are not reflected in the device descriptor until the device
 // is power-cycled or performs a device reset.
-func (d *Device) GetDescriptSN() (value string, err error) {
+func (d *Device) DescriptSN() (value string, err error) {
 
-	if d.SerialIndex > 0 {
-		value, err = d.GetStringDescriptor(d.SerialIndex)
+	if d.serialIx > 0 {
+		value, err = d.GetStringDescriptor(d.serialIx)
 	}
 
 	if err != nil {
-		err = fmt.Errorf("%s: %v", gocmdb.GetFunctionInfo(), err)
+		err = fmt.Errorf("%s: %v", gocmdb.FunctionInfo(), err)
 	}
 
 	return value, err

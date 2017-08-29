@@ -30,7 +30,7 @@ import (
 // required by the device for vendor commands sent via control transfer.
 type Device struct {
 	*usbci.Device
-	BufferSize int
+	bufferSize int
 }
 
 var (
@@ -49,25 +49,25 @@ func NewDevice(d *gousb.Device) (*Device, error) {
 	return nd, err
 }
 
-// GetBufferSize retrieves the size of the device data buffer.
-func (d *Device) GetBufferSize() (string, error) {
-	return strconv.Itoa(d.BufferSize), nil
+// bufferSize retrieves the size of the device data buffer.
+func (d *Device) BufferSize() (string, error) {
+	return strconv.Itoa(d.bufferSize), nil
 }
 
-// GetSoftwareID retrieves the software ID of the device from NVRAM.
-func (d *Device) GetSoftwareID() (string, error) {
+// SoftwareID retrieves the software ID of the device from NVRAM.
+func (d *Device) SoftwareID() (string, error) {
 	return d.getProperty(PropSoftwareID)
 }
 
-// GetProductVer retrieves the product version of the device from NVRAM.
-func (d *Device) GetProductVer() (value string, err error) {
+// ProductVer retrieves the product version of the device from NVRAM.
+func (d *Device) ProductVer() (value string, err error) {
 	value, err = d.getProperty(PropProductVer)
 	if len(value) <= 1 {value = ""}
 	return value, err
 }
 
-// GetDeviceSN retrieves the device configurable serial number from NVRAM.
-func (d *Device) GetDeviceSN() (string, error) {
+// DeviceSN retrieves the device configurable serial number from NVRAM.
+func (d *Device) DeviceSN() (string, error) {
 	return d.getProperty(PropDeviceSN)
 }
 
@@ -81,8 +81,8 @@ func (d *Device) EraseDeviceSN() (error) {
 	return d.setProperty(PropDeviceSN, "")
 }
 
-// GetFactorySN retrieves the device factory serial number from NVRAM.
-func (d *Device) GetFactorySN() (value string, err error) {
+// FactorySN retrieves the device factory serial number from NVRAM.
+func (d *Device) FactorySN() (value string, err error) {
 	value, err = d.getProperty(PropFactorySN)
 	if len(value) <= 1 {value = ""}
 	return value, err
@@ -99,14 +99,14 @@ func (d *Device) SetFactorySN(value string) (error) {
 // serial number to the configurable serial number in NVRAM.
 func (d *Device) CopyFactorySN(length int) (error) {
 
-	fs, err := d.GetFactorySN()
+	fs, err := d.FactorySN()
 
 	if err != nil {
-		return fmt.Errorf("%s: %v", gocmdb.GetFunctionInfo(), err)
+		return fmt.Errorf("%s: %v", gocmdb.FunctionInfo(), err)
 	}
 
 	if len(fs) == 0 {
-		return fmt.Errorf("%s: factory serial number not present", gocmdb.GetFunctionInfo())
+		return fmt.Errorf("%s: factory serial number not present", gocmdb.FunctionInfo())
 	}
 
 	limit := int(math.Min(float64(length), float64(len(fs))))
@@ -118,7 +118,7 @@ func (d *Device) CopyFactorySN(length int) (error) {
 // DeviceReset resets the device using low-level vendor commands.
 func (d *Device) DeviceReset() (err error) {
 
-	data := make([]byte, d.BufferSize)
+	data := make([]byte, d.bufferSize)
 	data[0] = CommandResetDevice
 
 	_, err = d.Control(
@@ -129,10 +129,10 @@ func (d *Device) DeviceReset() (err error) {
 		data)
 
 	if err != nil {
-		err = fmt.Errorf("%s: %v)", gocmdb.GetFunctionInfo(), err)
+		err = fmt.Errorf("%s: %v)", gocmdb.FunctionInfo(), err)
 	}
 
-	data = make([]byte, d.BufferSize)
+	data = make([]byte, d.bufferSize)
 
 	_, err = d.Control(
 		usbci.RequestDirectionIn + usbci.RequestTypeClass + usbci.RequestRecipientDevice,
@@ -142,12 +142,12 @@ func (d *Device) DeviceReset() (err error) {
 		data)
 
 	if err != nil {
-		return fmt.Errorf("%s: %v", gocmdb.GetFunctionInfo(), err)
+		return fmt.Errorf("%s: %v", gocmdb.FunctionInfo(), err)
 	}
 
 	if data[0] > 0x00 {
 		err = fmt.Errorf("%s: command error: %d",
-			gocmdb.GetFunctionInfo(), int(data[0]))
+			gocmdb.FunctionInfo(), int(data[0]))
 	}
 
 	time.Sleep(5 * time.Second)
@@ -185,13 +185,13 @@ func (d *Device) findBufferSize() (err error) {
 			data)
 
 		if rc == size {
-			d.BufferSize = size
+			d.bufferSize = size
 			break
 		}
 	}
 
 	if err != nil {
-		err = fmt.Errorf("%s: unsupported device", gocmdb.GetFunctionInfo())
+		err = fmt.Errorf("%s: unsupported device", gocmdb.FunctionInfo())
 	}
 
 	return err
@@ -200,7 +200,7 @@ func (d *Device) findBufferSize() (err error) {
 // getProperty retrieves a property from device NVRAM using low-level commands.
 func (d *Device) getProperty(id uint8) (value string, err error) {
 
-	data := make([]byte, d.BufferSize)
+	data := make([]byte, d.bufferSize)
 	copy(data, []byte{CommandGetProp, 0x01, id})
 
 	_, err = d.Control(
@@ -211,10 +211,10 @@ func (d *Device) getProperty(id uint8) (value string, err error) {
 		data)
 
 	if err != nil {
-		return value, fmt.Errorf("%s: %v", gocmdb.GetFunctionInfo(), err)
+		return value, fmt.Errorf("%s: %v", gocmdb.FunctionInfo(), err)
 	}
 
-	data = make([]byte, d.BufferSize)
+	data = make([]byte, d.bufferSize)
 
 	_, err = d.Control(
 		usbci.RequestDirectionIn + usbci.RequestTypeClass + usbci.RequestRecipientDevice,
@@ -224,12 +224,12 @@ func (d *Device) getProperty(id uint8) (value string, err error) {
 		data)
 
 	if err != nil {
-		return value, fmt.Errorf("%s: %v", gocmdb.GetFunctionInfo(), err)
+		return value, fmt.Errorf("%s: %v", gocmdb.FunctionInfo(), err)
 	}
 
 	if data[0] > 0x00 {
 		return value, fmt.Errorf("%s: command error: %d",
-			gocmdb.GetFunctionInfo(), int(data[0]))
+			gocmdb.FunctionInfo(), int(data[0]))
 	}
 
 	if data[1] > 0x00 {
@@ -242,11 +242,11 @@ func (d *Device) getProperty(id uint8) (value string, err error) {
 // setProperty configures a property in device NVRAM using low-level commands.
 func (d *Device) setProperty(id uint8, value string) (err error) {
 
-	if len(value) > d.BufferSize - 3 {
-		return fmt.Errorf("%s: property length > data buffer", gocmdb.GetFunctionInfo())
+	if len(value) > d.bufferSize - 3 {
+		return fmt.Errorf("%s: property length > data buffer", gocmdb.FunctionInfo())
 	}
 
-	data := make([]byte, d.BufferSize)
+	data := make([]byte, d.bufferSize)
 	copy(data[0:], []byte{CommandSetProp, uint8(len(value)+1), id})
 	copy(data[3:], value)
 
@@ -258,10 +258,10 @@ func (d *Device) setProperty(id uint8, value string) (err error) {
 		data)
 
 	if err != nil {
-		return fmt.Errorf("%s: %v", gocmdb.GetFunctionInfo(), err)
+		return fmt.Errorf("%s: %v", gocmdb.FunctionInfo(), err)
 	}
 
-	data = make([]byte, d.BufferSize)
+	data = make([]byte, d.bufferSize)
 
 	_, err = d.Control(
 		usbci.RequestDirectionIn + usbci.RequestTypeClass + usbci.RequestRecipientDevice,
@@ -271,12 +271,12 @@ func (d *Device) setProperty(id uint8, value string) (err error) {
 		data)
 
 	if err != nil {
-		return fmt.Errorf("%s: %v", gocmdb.GetFunctionInfo(), err)
+		return fmt.Errorf("%s: %v", gocmdb.FunctionInfo(), err)
 	}
 
 	if data[0] > 0x00 {
 		err = fmt.Errorf("%s: command error: %d",
-			gocmdb.GetFunctionInfo(), int(data[0]))
+			gocmdb.FunctionInfo(), int(data[0]))
 	}
 
 	return err

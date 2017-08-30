@@ -29,33 +29,43 @@ type DeviceInfo struct {
 	VendorName	string		`json:"vendor_name" csv: "vendor_name"`
 	ProductName	string		`json:"product_name" csv: "product_name"`
 	SerialNum	string		`json:"serial_num" csv:"serial_num"`
-	DescriptSN	string		`json:"descript_sn" csv:"-" nvp:"-"`
+	DescriptorSN	string		`json:"descriptor_sn" csv:"-" nvp:"-"`
 	Deltas		[][]string	`json:"deltas" csv:"-" nvp:"-"`
 }
 
-func NewDeviceInfo(d *Device) (di *DeviceInfo, errs []error) {
+func NewDeviceInfo(d *Device) (di *DeviceInfo, e error) {
 
-	var e error
+	ge := new(gocmdb.GetterError)
 
 	di = &DeviceInfo {
 		VendorID:	d.VendorID(),
 		ProductID:	d.ProductID(),
 	}
 
-	if di.HostName, e = os.Hostname();	e != nil {errs = append(errs, e)}
-	if di.VendorName, e = d.VendorName();	e != nil {errs = append(errs, e)}
-	if di.ProductName, e = d.ProductName();	e != nil {errs = append(errs, e)}
-	if di.DescriptSN, e = d.DescriptSN();	e != nil {errs = append(errs, e)}
+	if di.HostName, e = os.Hostname(); e != nil {ge.Add("HostName", e)}
+	if di.VendorName, e = d.VendorName(); e != nil {ge.Add("VendorName", e)}
+	if di.ProductName, e = d.ProductName();	e != nil {ge.Add("ProductName", e)}
+	if di.DescriptorSN, e = d.DescriptorSN(); e != nil {ge.Add("DescriptorSN", e)}
 
-	di.SerialNum = di.DescriptSN
+	di.SerialNum = di.DescriptorSN
 
-	return di, errs
+	return di, ge
 }
 
-func GetDeviceInfo(fn string) (*DeviceInfo, error) {
-	di := new(DeviceInfo)
-	e := gocmdb.RestoreObject(di, fn)
-	return di, e
+func (di *DeviceInfo) Save(fn string) (error) {
+	return gocmdb.SaveObject(*di, fn)
+}
+
+func (di *DeviceInfo) Restore(fn string) (error) {
+	return gocmdb.RestoreObject(fn, di)
+}
+
+func (di *DeviceInfo) Matches(c *gocmdb.Comparable) (bool) {
+	return reflect.DeepEqual(di, c)
+}
+
+func (di *DeviceInfo) Bare() ([]byte) {
+	return []byte(di.HostName + "," + di.SerialNum)
 }
 
 func (di *DeviceInfo) JSON() ([]byte, error) {
@@ -72,12 +82,4 @@ func (di *DeviceInfo) CSV() ([]byte, error) {
 
 func (di *DeviceInfo) NVP() ([]byte, error) {
 	return gocmdb.ObjectToNVP(*di)
-}
-
-func (di *DeviceInfo) Save(fn string) (error) {
-	return gocmdb.SaveObject(*di, fn)
-}
-
-func (di *DeviceInfo) Matches(t interface{}) (bool) {
-	return reflect.DeepEqual(di, t)
 }

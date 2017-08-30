@@ -115,8 +115,8 @@ func (d *Device) CopyFactorySN(length int) (error) {
 	return err
 }
 
-// DeviceReset resets the device using low-level vendor commands.
-func (d *Device) DeviceReset() (err error) {
+// Reset overides inherited Reset method with a low-level vendor reset.
+func (d *Device) Reset() (err error) {
 
 	data := make([]byte, d.bufferSize)
 	data[0] = CommandResetDevice

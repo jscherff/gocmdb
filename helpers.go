@@ -91,7 +91,7 @@ func SaveObject(t interface{}, fn string) (e error) {
 }
 
 // RestoreObject restores an object from a JSON file.
-func RestoreObject(t interface{}, fn string) (e error) {
+func RestoreObject(fn string, t interface{}) (e error) {
 
 	fh, e := os.Open(fn)
 	defer fh.Close()

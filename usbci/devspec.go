@@ -34,7 +34,7 @@ type DeviceSpec struct {
 	Deltas		[][]string	`json:"deltas" csv:"-" nvp:"-"`
 }
 
-func NewDeviceSpec(d *Device) (ds *DeviceSpec, errs []error) {
+func NewDeviceSpec(d *Device) (ds *DeviceSpec, e error) {
 
 	ds = &DeviceSpec {
 		BusNumber:	d.BusNumber(),
@@ -48,13 +48,23 @@ func NewDeviceSpec(d *Device) (ds *DeviceSpec, errs []error) {
 		MaxPktSize:	d.MaxPktSize(),
 	}
 
-	return ds, errs
+	return ds, nil
 }
 
-func GetDeviceSpec(fn string) (*DeviceSpec, error) {
-	ds := new(DeviceSpec)
-	e := gocmdb.RestoreObject(ds, fn)
-	return ds, e
+func (ds *DeviceSpec) Save(fn string) (error) {
+	return gocmdb.SaveObject(*ds, fn)
+}
+
+func (ds *DeviceSpec) Restore(fn string) (error) {
+	return gocmdb.RestoreObject(fn, ds)
+}
+
+func (ds *DeviceSpec) Matches(c *gocmdb.Comparable) (bool) {
+	return reflect.DeepEqual(ds, c)
+}
+
+func (ds *DeviceSpec) Bare() ([]byte) {
+	return []byte{}
 }
 
 func (ds *DeviceSpec) JSON() ([]byte, error) {
@@ -71,12 +81,4 @@ func (ds *DeviceSpec) CSV() ([]byte, error) {
 
 func (ds *DeviceSpec) NVP() ([]byte, error) {
 	return gocmdb.ObjectToNVP(*ds)
-}
-
-func (ds *DeviceSpec) Save(fn string) (error) {
-	return gocmdb.SaveObject(*ds, fn)
-}
-
-func (ds *DeviceSpec) Matches(t interface{}) (bool) {
-	return reflect.DeepEqual(ds, t)
 }

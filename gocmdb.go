@@ -19,4 +19,5 @@ var ReportFormats = [][]string {
 	[]string {"nvp",  "Name-Value Pair format"},
 	[]string {"xml",  "eXtensible Markup Language"},
 	[]string {"json", "JavaScript Object Notation"},
+	[]string {"bare", "Hostname and serial number"},
 }

@@ -14,25 +14,31 @@
 
 package gocmdb
 
-import (
-	"strings"
-	"fmt"
-)
-
-// GetterError holds a collection of errors encountered when calling several
-// getter methods while populating data structures.
-type GetterError struct {
-	Getters	[]string
-	Errors	[]error
+type Reportable interface {
+	Bare() ([]byte)
+	JSON() ([]byte, error)
+	XML() ([]byte, error)
+	CSV() ([]byte, error)
+	NVP() ([]byte, error)
 }
 
-// Add adds a new getter error to GetterError.
-func (e *GetterError) Add(gs string, ge error) {
-	e.Getters = append(e.Getters, gs)
-	e.Errors = append(e.Errors, ge)
+type Persistable interface {
+	Save(string) (error)
+	Restore(string) (error)
 }
 
-// Error implements the Error method of the error interface.
-func (e *GetterError) Error() string {
-	return fmt.Sprintf("getter errors: %s\n", strings.Join(e.Getters, ", "))
+type Comparable interface {
+	Matches(*Comparable) (bool)
+}
+
+type Configurable interface {
+	DeviceSN() (string, error)
+	SetDeviceSN(string) (error)
+	SetFactorySN(string) (error)
+	CopyFactorySN(int) (error)
+	EraseDeviceSN() (error)
+}
+
+type Resettable interface {
+	Reset() (error)
 }

@@ -135,7 +135,7 @@ func (d *Device) ProductName() (value string, err error) {
 // device descriptor. Changes made to the serial number on the device using a
 // control transfer are not reflected in the device descriptor until the device
 // is power-cycled or performs a device reset.
-func (d *Device) DescriptSN() (value string, err error) {
+func (d *Device) DescriptorSN() (value string, err error) {
 
 	if d.serialIx > 0 {
 		value, err = d.GetStringDescriptor(d.serialIx)

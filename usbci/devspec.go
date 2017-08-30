@@ -59,8 +59,8 @@ func (ds *DeviceSpec) Restore(fn string) (error) {
 	return gocmdb.RestoreObject(fn, ds)
 }
 
-func (ds *DeviceSpec) Matches(c *gocmdb.Comparable) (bool) {
-	return reflect.DeepEqual(ds, c)
+func (di *DeviceSpec) Matches(i interface{}) (bool) {
+	return reflect.DeepEqual(di, i)
 }
 
 func (ds *DeviceSpec) Bare() ([]byte) {

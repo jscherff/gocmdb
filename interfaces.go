@@ -28,7 +28,7 @@ type Persistable interface {
 }
 
 type Comparable interface {
-	Matches(*Comparable) (bool)
+	Matches(interface{}) (bool)
 }
 
 type Configurable interface {

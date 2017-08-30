@@ -18,7 +18,9 @@ import (
 	"github.com/jscherff/gocmdb"
 	"encoding/json"
 	"encoding/xml"
+	"strings"
 	"reflect"
+	"errors"
 )
 
 type DeviceSpec struct {
@@ -37,7 +39,7 @@ type DeviceSpec struct {
 
 func NewDeviceSpec(d *Device) (ds *DeviceSpec, e error) {
 
-	ge := new(gocmdb.GetterError)
+	var es []string
 
 	ds = &DeviceSpec {
 		BusNumber:	d.BusNumber(),
@@ -51,9 +53,13 @@ func NewDeviceSpec(d *Device) (ds *DeviceSpec, e error) {
 		MaxPktSize:	d.MaxPktSize(),
 	}
 
-	if ds.BufferSize, e = d.BufferSize(); e != nil {ge.Add("BufferSize", e)}
+	if ds.BufferSize, e = d.BufferSize(); e != nil {es = append(es, "BufferSize")}
 
-	return ds, ge
+	if len(es) > 0 {
+		e = errors.New("getter errors: " + strings.Join(es, ","))
+	}
+
+	return ds, e
 }
 
 func (ds *DeviceSpec) Save(fn string) (error) {
@@ -64,8 +70,8 @@ func (ds *DeviceSpec) Restore(fn string) (error) {
 	return gocmdb.RestoreObject(fn, ds)
 }
 
-func (ds *DeviceSpec) Matches(c *gocmdb.Comparable) (bool) {
-	return reflect.DeepEqual(ds, c)
+func (ds *DeviceSpec) Matches(i interface{}) (bool) {
+	return reflect.DeepEqual(ds, i)
 }
 
 func (ds *DeviceSpec) Bare() ([]byte) {

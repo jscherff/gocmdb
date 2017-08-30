@@ -19,6 +19,8 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"reflect"
+	"strings"
+	"errors"
 	"os"
 )
 
@@ -35,21 +37,25 @@ type DeviceInfo struct {
 
 func NewDeviceInfo(d *Device) (di *DeviceInfo, e error) {
 
-	ge := new(gocmdb.GetterError)
+	var es []string
 
 	di = &DeviceInfo {
 		VendorID:	d.VendorID(),
 		ProductID:	d.ProductID(),
 	}
 
-	if di.HostName, e = os.Hostname(); e != nil {ge.Add("HostName", e)}
-	if di.VendorName, e = d.VendorName(); e != nil {ge.Add("VendorName", e)}
-	if di.ProductName, e = d.ProductName();	e != nil {ge.Add("ProductName", e)}
-	if di.DescriptorSN, e = d.DescriptorSN(); e != nil {ge.Add("DescriptorSN", e)}
+	if di.HostName, e = os.Hostname(); e != nil {es = append(es, "HostName")}
+	if di.VendorName, e = d.VendorName(); e != nil {es = append(es, "VendorName")}
+	if di.ProductName, e = d.ProductName();	e != nil {es = append(es, "ProductName")}
+	if di.DescriptorSN, e = d.DescriptorSN(); e != nil {es = append(es, "DescriptorSN")}
 
 	di.SerialNum = di.DescriptorSN
 
-	return di, ge
+	if len(es) > 0 {
+		e = errors.New("getter errors: " + strings.Join(es, ","))
+	}
+
+	return di, e
 }
 
 func (di *DeviceInfo) Save(fn string) (error) {
@@ -60,8 +66,8 @@ func (di *DeviceInfo) Restore(fn string) (error) {
 	return gocmdb.RestoreObject(fn, di)
 }
 
-func (di *DeviceInfo) Matches(c *gocmdb.Comparable) (bool) {
-	return reflect.DeepEqual(di, c)
+func (di *DeviceInfo) Matches(i interface{}) (bool) {
+	return reflect.DeepEqual(di, i)
 }
 
 func (di *DeviceInfo) Bare() ([]byte) {

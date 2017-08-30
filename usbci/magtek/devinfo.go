@@ -18,7 +18,9 @@ import (
 	"github.com/jscherff/gocmdb"
 	"encoding/json"
 	"encoding/xml"
+	"strings"
 	"reflect"
+	"errors"
 	"os"
 )
 
@@ -39,25 +41,29 @@ type DeviceInfo struct {
 
 func NewDeviceInfo(d *Device) (di *DeviceInfo, e error) {
 
-	ge := new(gocmdb.GetterError)
+	var es []string
 
 	di = &DeviceInfo {
 		VendorID:	d.VendorID(),
 		ProductID:	d.ProductID(),
 	}
 
-	if di.HostName, e = os.Hostname(); e != nil {ge.Add("HostName", e)}
-	if di.VendorName, e = d.VendorName(); e != nil {ge.Add("VendorName", e)}
-	if di.ProductName, e = d.ProductName(); e != nil {ge.Add("ProductName", e)}
-	if di.DeviceSN, e = d.DeviceSN(); e != nil {ge.Add("DeviceSN", e)}
-	if di.FactorySN, e = d.FactorySN(); e != nil {ge.Add("FactorySN", e)}
-	if di.DescriptorSN, e = d.DescriptorSN(); e != nil {ge.Add("DescriptorSN", e)}
-	if di.ProductVer, e = d.ProductVer(); e != nil {ge.Add("ProductVer", e)}
-	if di.SoftwareID, e = d.SoftwareID(); e != nil {ge.Add("SoftwareId", e)}
+	if di.HostName, e = os.Hostname(); e != nil {es = append(es, "HostName")}
+	if di.VendorName, e = d.VendorName(); e != nil {es = append(es, "VendorName")}
+	if di.ProductName, e = d.ProductName(); e != nil {es = append(es, "ProductName")}
+	if di.DeviceSN, e = d.DeviceSN(); e != nil {es = append(es, "DeviceSN")}
+	if di.FactorySN, e = d.FactorySN(); e != nil {es = append(es, "FactorySN")}
+	if di.DescriptorSN, e = d.DescriptorSN(); e != nil {es = append(es, "DescriptorSN")}
+	if di.ProductVer, e = d.ProductVer(); e != nil {es = append(es, "ProductVer")}
+	if di.SoftwareID, e = d.SoftwareID(); e != nil {es = append(es, "SoftwareId")}
 
 	di.SerialNum = di.DeviceSN
 
-	return di, ge
+	if len(es) > 0 {
+		e = errors.New("getter errors: " + strings.Join(es, ","))
+	}
+
+	return di, e
 }
 
 func (di *DeviceInfo) Save(fn string) (error) {
@@ -68,8 +74,8 @@ func (di *DeviceInfo) Restore(fn string) (error) {
 	return gocmdb.RestoreObject(fn, di)
 }
 
-func (di *DeviceInfo) Matches(c *gocmdb.Comparable) (bool) {
-	return reflect.DeepEqual(di, c)
+func (di *DeviceInfo) Matches(i interface{}) (bool) {
+	return reflect.DeepEqual(di, i)
 }
 
 func (di *DeviceInfo) Bare() ([]byte) {

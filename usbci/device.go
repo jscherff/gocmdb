@@ -17,6 +17,7 @@ package usbci
 import (
 	"github.com/google/gousb"
 	"github.com/jscherff/gocmdb"
+	"reflect"
 	"strconv"
 	"fmt"
 )
@@ -48,66 +49,76 @@ func NewDevice(d *gousb.Device) (*Device, error) {
 	return nd, err
 }
 
+// Convenience method to retrieve device serial number.
+func (this *Device) ID() (string, error) {
+	return this.DescriptorSN()
+}
+
+// Convenience method to help identify object type to other apps.
+func (this *Device) Type() (string) {
+	return reflect.TypeOf(this).String()
+}
+
 // BusNumber retrieves the USB bus number of the device.
-func (d *Device) BusNumber() string {
-	return strconv.Itoa(d.Desc.Bus)
+func (this *Device) BusNumber() string {
+	return strconv.Itoa(this.Desc.Bus)
 }
 
 // BusAddress retrieves address of the device on the USB bus.
-func (d *Device) BusAddress() string {
-	return strconv.Itoa(d.Desc.Address)
+func (this *Device) BusAddress() string {
+	return strconv.Itoa(this.Desc.Address)
 }
 
 // DeviceSpeed retrieves the negotiated operating speed of the device.
-func (d *Device) DeviceSpeed() string {
-	return d.Desc.Speed.String()
+func (this *Device) DeviceSpeed() string {
+	return this.Desc.Speed.String()
 }
 
 // USBSpec retrieves the USB specification release number of the device.
-func (d *Device) USBSpec() string {
-	return d.Desc.Spec.String()
+func (this *Device) USBSpec() string {
+	return this.Desc.Spec.String()
 }
 
 // DeviceVer retrieves the major/minor version number ofthe device.
-func (d *Device) DeviceVer() string {
-	return d.Desc.Device.String()
+func (this *Device) DeviceVer() string {
+	return this.Desc.Device.String()
 }
 
 // GetVendorId retrieves the USB vendor ID of the device.
-func (d *Device) VendorID() string {
-	return d.Desc.Vendor.String()
+func (this *Device) VendorID() string {
+	return this.Desc.Vendor.String()
 }
 
 // ProductID retrieves the USB product ID of the device.
-func (d *Device) ProductID() string {
-	return d.Desc.Product.String()
+func (this *Device) ProductID() string {
+	return this.Desc.Product.String()
 }
 
 // USBClass retrieves the USB class of the device.
-func (d *Device) USBClass() string {
-	return d.Desc.Class.String()
+func (this *Device) USBClass() string {
+	return this.Desc.Class.String()
 }
 
 // USBSubclass retrieves the USB subclass of the device.
-func (d *Device) USBSubclass() string {
-	return d.Desc.SubClass.String()
+func (this *Device) USBSubclass() string {
+	return this.Desc.SubClass.String()
 }
 
 // USBProtocol retrieves the USB protocol of the device.
-func (d *Device) USBProtocol() string {
-	return d.Desc.Protocol.String()
+func (this *Device) USBProtocol() string {
+	return this.Desc.Protocol.String()
 }
 
 // MaxPktSize retrieves the maximum size of the control transfer.
-func (d *Device) MaxPktSize() string {
-	return strconv.Itoa(d.Desc.MaxControlPacketSize)
+func (this *Device) MaxPktSize() string {
+	return strconv.Itoa(this.Desc.MaxControlPacketSize)
 }
 
 // VendorName retrieves the manufacturer name from device descriptor.
-func (d *Device) VendorName() (value string, err error) {
+func (this *Device) VendorName() (value string, err error) {
 
-	if d.manufacturerIx > 0 {
-		value, err = d.GetStringDescriptor(d.manufacturerIx)
+	if this.manufacturerIx > 0 {
+		value, err = this.GetStringDescriptor(this.manufacturerIx)
 	}
 
 	if err != nil {
@@ -118,10 +129,10 @@ func (d *Device) VendorName() (value string, err error) {
 }
 
 // ProductName retrieves the product name from device descriptor.
-func (d *Device) ProductName() (value string, err error) {
+func (this *Device) ProductName() (value string, err error) {
 
-	if d.productIx > 0 {
-		value, err = d.GetStringDescriptor(d.productIx)
+	if this.productIx > 0 {
+		value, err = this.GetStringDescriptor(this.productIx)
 	}
 
 	if err != nil {
@@ -135,10 +146,10 @@ func (d *Device) ProductName() (value string, err error) {
 // device descriptor. Changes made to the serial number on the device using a
 // control transfer are not reflected in the device descriptor until the device
 // is power-cycled or performs a device reset.
-func (d *Device) DescriptorSN() (value string, err error) {
+func (this *Device) DescriptorSN() (value string, err error) {
 
-	if d.serialIx > 0 {
-		value, err = d.GetStringDescriptor(d.serialIx)
+	if this.serialIx > 0 {
+		value, err = this.GetStringDescriptor(this.serialIx)
 	}
 
 	if err != nil {

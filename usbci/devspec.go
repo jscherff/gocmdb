@@ -22,15 +22,15 @@ import (
 )
 
 type DeviceSpec struct {
-	BusNumber	string		`json:"bus_number" csv:"bus_number"`
-	BusAddress	string		`json:"bus_address" csv:"bus_address"`
-	USBSpec		string		`json:"usb_spec" csv:"usb_spec"`
-	USBClass	string		`json:"usb_class" csv:"usb_class"`
-	USBSubclass	string		`json:"usb_subclass" csv:"usb_subclass"`
-	USBProtocol	string		`json:"usb_protocol" csv:"usb_protocol"`
-	DeviceSpeed	string		`json:"device_speed" csv:"device_speed"`
-	DeviceVer	string		`json:"device_ver" csv:"device_ver"`
-	MaxPktSize	string		`json:"max_pkt_size" csv:"max_pkt_size"`
+	BusNumber	string		`json:"bus_number"`
+	BusAddress	string		`json:"bus_address"`
+	USBSpec		string		`json:"usb_spec"`
+	USBClass	string		`json:"usb_class"`
+	USBSubclass	string		`json:"usb_subclass"`
+	USBProtocol	string		`json:"usb_protocol"`
+	DeviceSpeed	string		`json:"device_speed"`
+	DeviceVer	string		`json:"device_ver"`
+	MaxPktSize	string		`json:"max_pkt_size"`
 	Deltas		[][]string	`json:"deltas" csv:"-" nvp:"-"`
 }
 
@@ -51,34 +51,44 @@ func NewDeviceSpec(d *Device) (ds *DeviceSpec, e error) {
 	return ds, nil
 }
 
-func (ds *DeviceSpec) Save(fn string) (error) {
-	return gocmdb.SaveObject(*ds, fn)
+func (this *DeviceSpec) Type() (string) {
+	return reflect.TypeOf(this).String()
 }
 
-func (ds *DeviceSpec) Restore(fn string) (error) {
-	return gocmdb.RestoreObject(fn, ds)
+func (this *DeviceSpec) Save(fn string) (error) {
+	return gocmdb.SaveObject(*this, fn)
 }
 
-func (di *DeviceSpec) Matches(i interface{}) (bool) {
-	return reflect.DeepEqual(di, i)
+func (this *DeviceSpec) Restore(fn string) (error) {
+	return gocmdb.RestoreObject(fn, this)
 }
 
-func (ds *DeviceSpec) Bare() ([]byte) {
+func (this *DeviceSpec) Matches(i interface{}) (bool) {
+	return reflect.DeepEqual(this, i)
+}
+
+func (this *DeviceSpec) Compare(fn string) (ss [][]string, e error) {
+	ds := new(DeviceSpec)
+	if e = ds.Restore(fn); e != nil {return ss, e}
+	return gocmdb.CompareObjects(*this, *ds)
+}
+
+func (this *DeviceSpec) Bare() ([]byte) {
 	return []byte{}
 }
 
-func (ds *DeviceSpec) JSON() ([]byte, error) {
-	return json.Marshal(*ds)
+func (this *DeviceSpec) JSON() ([]byte, error) {
+	return json.Marshal(*this)
 }
 
-func (ds *DeviceSpec) XML() ([]byte, error) {
-	return xml.Marshal(*ds)
+func (this *DeviceSpec) XML() ([]byte, error) {
+	return xml.Marshal(*this)
 }
 
-func (ds *DeviceSpec) CSV() ([]byte, error) {
-	return gocmdb.ObjectToCSV(*ds)
+func (this *DeviceSpec) CSV() ([]byte, error) {
+	return gocmdb.ObjectToCSV(*this)
 }
 
-func (ds *DeviceSpec) NVP() ([]byte, error) {
-	return gocmdb.ObjectToNVP(*ds)
+func (this *DeviceSpec) NVP() ([]byte, error) {
+	return gocmdb.ObjectToNVP(*this)
 }

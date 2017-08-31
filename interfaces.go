@@ -15,20 +15,25 @@
 package gocmdb
 
 type Reportable interface {
-	Bare() ([]byte)
-	JSON() ([]byte, error)
-	XML() ([]byte, error)
+	ID() (string, error)
 	CSV() ([]byte, error)
 	NVP() ([]byte, error)
+	XML() ([]byte, error)
+	JSON() ([]byte, error)
+	Bare() ([]byte)
 }
 
-type Persistable interface {
+type Auditable interface {
+	ID() (string, error)
 	Save(string) (error)
 	Restore(string) (error)
+	Compare(string) ([][]string, error)
 }
 
-type Comparable interface {
-	Matches(interface{}) (bool)
+type Registerable interface {
+	Type() (string)
+	ID() (string, error)
+	JSON() ([]byte, error)
 }
 
 type Configurable interface {
@@ -37,6 +42,7 @@ type Configurable interface {
 	SetFactorySN(string) (error)
 	CopyFactorySN(int) (error)
 	EraseDeviceSN() (error)
+	Reset() (error)
 }
 
 type Resettable interface {

@@ -12,17 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package usbci
+package gocmdb
 
-import (
-	"github.com/jscherff/gocmdb"
-	"encoding/json"
-	"encoding/xml"
-	"reflect"
-	"strings"
-	"errors"
-	"os"
-)
+import "encoding/json"
+
+type Change struct {
+	FieldName	string
+	OldValue	string
+	NewValue	string
+}
+
+type Changes []Change
+
+func NewChanges(ss [][]string) (c Changes) {
+
+	for _, s := range ss {
+		if len(s) != 3 {continue}
+		c = append(c, Change{s[0], s[1], s[2]})
+	}
+
+	return c
+}
+
+func (this *Changes) JSON() ([]byte, error) {
+	return json.Marshal(*this)
+}
 
 type DeviceInfo struct {
 	HostName	string		`json:"hostname"`
@@ -31,31 +45,14 @@ type DeviceInfo struct {
 	VendorName	string		`json:"vendor_name"`
 	ProductName	string		`json:"product_name"`
 	SerialNum	string		`json:"serial_num"`
-	DescriptorSN	string		`json:"descriptor_sn" csv:"-" nvp:"-"`
-	Deltas		[][]string	`json:"deltas" csv:"-" nvp:"-"`
+	ProductVer	string		`json:"product_ver"`
+	SoftwareID	string		`json:"software_id"`
 }
 
-func NewDeviceInfo(d *Device) (di *DeviceInfo, e error) {
+func NewDeviceInfo(b []byte) (di *DeviceInfo, e error) {
 
-	var es []string
+	di := make(DeviceInfo)
 
-	di = &DeviceInfo {
-		VendorID:	d.VendorID(),
-		ProductID:	d.ProductID(),
-	}
-
-	if di.HostName, e = os.Hostname(); e != nil {es = append(es, "HostName")}
-	if di.VendorName, e = d.VendorName(); e != nil {es = append(es, "VendorName")}
-	if di.ProductName, e = d.ProductName();	e != nil {es = append(es, "ProductName")}
-	if di.DescriptorSN, e = d.DescriptorSN(); e != nil {es = append(es, "DescriptorSN")}
-
-	di.SerialNum = di.DescriptorSN
-
-	if len(es) > 0 {
-		e = errors.New("getter errors: " + strings.Join(es, ","))
-	}
-
-	return di, e
 }
 
 func (this *DeviceInfo) ID() (string, error) {
@@ -65,7 +62,7 @@ func (this *DeviceInfo) ID() (string, error) {
 }
 
 func (this *DeviceInfo) Type() (string) {
-	return reflect.TypeOf(this).String()
+	return reflect.TypeOf(*this).String()
 }
 
 func (this *DeviceInfo) Save(fn string) (error) {

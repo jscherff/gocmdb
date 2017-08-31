@@ -66,34 +66,50 @@ func NewDeviceInfo(d *Device) (di *DeviceInfo, e error) {
 	return di, e
 }
 
-func (di *DeviceInfo) Save(fn string) (error) {
-	return gocmdb.SaveObject(*di, fn)
+func (this *DeviceInfo) ID() (string, error) {
+	var e error
+	if len(this.SerialNum) == 0 {e = errors.New("no unique identifier")}
+	return this.SerialNum, e
 }
 
-func (di *DeviceInfo) Restore(fn string) (error) {
-	return gocmdb.RestoreObject(fn, di)
+func (this *DeviceInfo) Type() (string) {
+	return reflect.TypeOf(*this).String()
 }
 
-func (di *DeviceInfo) Matches(i interface{}) (bool) {
-	return reflect.DeepEqual(di, i)
+func (this *DeviceInfo) Save(fn string) (error) {
+	return gocmdb.SaveObject(*this, fn)
 }
 
-func (di *DeviceInfo) Bare() ([]byte) {
-	return []byte(di.HostName + "," + di.SerialNum)
+func (this *DeviceInfo) Restore(fn string) (error) {
+	return gocmdb.RestoreObject(fn, this)
 }
 
-func (di *DeviceInfo) JSON() ([]byte, error) {
-	return json.Marshal(*di)
+func (this *DeviceInfo) Matches(i interface{}) (bool) {
+	return reflect.DeepEqual(this, i)
 }
 
-func (di *DeviceInfo) XML() ([]byte, error) {
-	return xml.Marshal(*di)
+func (this *DeviceInfo) Compare(fn string) (ss [][]string, e error) {
+	di := new(DeviceInfo)
+	if e = di.Restore(fn); e != nil {return ss, e}
+	return gocmdb.CompareObjects(*this, *di)
 }
 
-func (di *DeviceInfo) CSV() ([]byte, error) {
-	return gocmdb.ObjectToCSV(*di)
+func (this *DeviceInfo) Bare() ([]byte) {
+	return []byte(this.HostName + "," + this.SerialNum)
 }
 
-func (di *DeviceInfo) NVP() ([]byte, error) {
-	return gocmdb.ObjectToNVP(*di)
+func (this *DeviceInfo) JSON() ([]byte, error) {
+	return json.Marshal(*this)
+}
+
+func (this *DeviceInfo) XML() ([]byte, error) {
+	return xml.Marshal(*this)
+}
+
+func (this *DeviceInfo) CSV() ([]byte, error) {
+	return gocmdb.ObjectToCSV(*this)
+}
+
+func (this *DeviceInfo) NVP() ([]byte, error) {
+	return gocmdb.ObjectToNVP(*this)
 }

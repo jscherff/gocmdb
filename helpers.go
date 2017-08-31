@@ -46,7 +46,9 @@ func FunctionInfo() string {
 // of {{name, name, ...}, {value, value, ...}}.
 func ObjectToCSV (t interface{}) (b []byte, e error) {
 
-	if ssi, e := ObjectToSlice(t, "csv"); e == nil {
+	var ssi [][]string
+
+	if ssi, e = ObjectToSlice(t, "csv"); e == nil {
 		ss := make([][]string, 2)
 		for _, si := range ssi {
 			 ss[NameIx] = append(ss[NameIx], si[NameIx])
@@ -65,7 +67,9 @@ func ObjectToCSV (t interface{}) (b []byte, e error) {
 // value pairs separated by newlines.
 func ObjectToNVP (t interface{}) (b []byte, e error) {
 
-	if ssi, e := ObjectToSlice(t, "nvp"); e == nil {
+	var ssi [][]string
+
+	if ssi, e = ObjectToSlice(t, "nvp"); e == nil {
 		var s string
 		for _, si := range ssi {
 			s += fmt.Sprintf("%s:%s\n", si[NameIx], si[ValueIx])
@@ -112,10 +116,12 @@ func CompareObjects(a interface{}, b interface{}) (ss[][]string, e error) {
 
 	if reflect.DeepEqual(a, b) {return ss, e}
 
-	as, e := ObjectToSlice(a, "")
+	var as, bs [][]string
+
+	as, e = ObjectToSlice(a, "")
 	if e != nil {return ss, e}
 
-	bs, e := ObjectToSlice(b, "")
+	bs, e = ObjectToSlice(b, "")
 	if e != nil {return ss, e}
 
 	if al, bl := len(as), len(bs); al != bl {

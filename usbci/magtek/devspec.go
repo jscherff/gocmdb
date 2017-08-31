@@ -62,34 +62,44 @@ func NewDeviceSpec(d *Device) (ds *DeviceSpec, e error) {
 	return ds, e
 }
 
-func (ds *DeviceSpec) Save(fn string) (error) {
-	return gocmdb.SaveObject(*ds, fn)
+func (this *DeviceSpec) Type() (string) {
+	return reflect.TypeOf(this).String()
 }
 
-func (ds *DeviceSpec) Restore(fn string) (error) {
-	return gocmdb.RestoreObject(fn, ds)
+func (this *DeviceSpec) Save(fn string) (error) {
+	return gocmdb.SaveObject(*this, fn)
 }
 
-func (ds *DeviceSpec) Matches(i interface{}) (bool) {
-	return reflect.DeepEqual(ds, i)
+func (this *DeviceSpec) Restore(fn string) (error) {
+	return gocmdb.RestoreObject(fn, this)
 }
 
-func (ds *DeviceSpec) Bare() ([]byte) {
+func (this *DeviceSpec) Matches(i interface{}) (bool) {
+	return reflect.DeepEqual(this, i)
+}
+
+func (this *DeviceSpec) Compare(fn string) (ss [][]string, e error) {
+	ds := new(DeviceSpec)
+	if e = ds.Restore(fn); e != nil {return ss, e}
+	return gocmdb.CompareObjects(*this, *ds)
+}
+
+func (this *DeviceSpec) Bare() ([]byte) {
 	return []byte{}
 }
 
-func (ds *DeviceSpec) JSON() ([]byte, error) {
-	return json.Marshal(*ds)
+func (this *DeviceSpec) JSON() ([]byte, error) {
+	return json.Marshal(*this)
 }
 
-func (ds *DeviceSpec) XML() ([]byte, error) {
-	return xml.Marshal(*ds)
+func (this *DeviceSpec) XML() ([]byte, error) {
+	return xml.Marshal(*this)
 }
 
-func (ds *DeviceSpec) CSV() ([]byte, error) {
-	return gocmdb.ObjectToCSV(*ds)
+func (this *DeviceSpec) CSV() ([]byte, error) {
+	return gocmdb.ObjectToCSV(*this)
 }
 
-func (ds *DeviceSpec) NVP() ([]byte, error) {
-	return gocmdb.ObjectToNVP(*ds)
+func (this *DeviceSpec) NVP() ([]byte, error) {
+	return gocmdb.ObjectToNVP(*this)
 }

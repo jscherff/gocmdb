@@ -36,7 +36,6 @@ type DeviceInfo struct {
 	DescriptorSN	string		`json:"descriptor_sn" csv:"-" nvp:"-"`
 	ProductVer	string		`json:"product_ver"`
 	SoftwareID	string		`json:"software_id"`
-	Deltas		[][]string	`json:"deltas" csv:"-" nvp:"-"`
 }
 
 func NewDeviceInfo(d *Device) (di *DeviceInfo, e error) {

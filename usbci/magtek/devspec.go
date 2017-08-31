@@ -34,7 +34,6 @@ type DeviceSpec struct {
 	DeviceVer	string		`json:"device_ver"`
 	MaxPktSize	string		`json:"max_pkt_size"`
 	BufferSize	string		`json:"buffer_size"`
-	Deltas		[][]string	`json:"deltas" csv:"-" nvp:"-"`
 }
 
 func NewDeviceSpec(d *Device) (ds *DeviceSpec, e error) {

@@ -20,15 +20,15 @@ import (
 )
 
 type Device struct {
-	HostName	string		`json:"hostname"`
-	VendorID	string		`json:"vendor_id"`
-	ProductID	string		`json:"product_id"`
-	SerialNum	string		`json:"serial_num"`
-	VendorName	string		`json:"vendor_name"`
-	ProductName	string		`json:"product_name"`
-	ProductVer	string		`json:"product_ver"`
-	SoftwareID	string		`json:"software_id"`
-	ObjectType	string		`json:"object_type"`
+	HostName	string	`json:"hostname,omitempty"`
+	VendorID	string	`json:"vendor_id,omitempty"`
+	ProductID	string	`json:"product_id,omitempty"`
+	SerialNum	string	`json:"serial_num,omitempty"`
+	VendorName	string	`json:"vendor_name,omitempty"`
+	ProductName	string	`json:"product_name,omitempty"`
+	ProductVer	string	`json:"product_ver,omitempty"`
+	SoftwareID	string	`json:"software_id,omitempty"`
+	ObjectType	string	`json:"object_type,omitempty"`
 }
 
 func NewDevice(j []byte) (*Device, error) {

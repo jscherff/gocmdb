@@ -17,9 +17,9 @@ package webapi
 import "encoding/json"
 
 type Change struct {
-	FieldName	string
-	OldValue	string
-	NewValue	string
+	FieldName	string	`json:"omitempty"`
+	OldValue	string	`json:"omitempty"`
+	NewValue	string	`json:"omitempty"`
 }
 
 type Changes []Change

@@ -28,9 +28,9 @@ type DeviceInfo struct {
 	HostName	string		`json:"hostname"`
 	VendorID	string		`json:"vendor_id"`
 	ProductID	string		`json:"product_id"`
+	SerialNum	string		`json:"serial_num"`
 	VendorName	string		`json:"vendor_name"`
 	ProductName	string		`json:"product_name"`
-	SerialNum	string		`json:"serial_num"`
 	DescriptorSN	string		`json:"descriptor_sn" csv:"-" nvp:"-"`
 }
 

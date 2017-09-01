@@ -23,9 +23,9 @@ type Device struct {
 	HostName	string		`json:"hostname"`
 	VendorID	string		`json:"vendor_id"`
 	ProductID	string		`json:"product_id"`
+	SerialNum	string		`json:"serial_num"`
 	VendorName	string		`json:"vendor_name"`
 	ProductName	string		`json:"product_name"`
-	SerialNum	string		`json:"serial_num"`
 	ProductVer	string		`json:"product_ver"`
 	SoftwareID	string		`json:"software_id"`
 	ObjectType	string		`json:"object_type"`

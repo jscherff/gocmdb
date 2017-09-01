@@ -28,14 +28,14 @@ type DeviceInfo struct {
 	HostName	string		`json:"hostname"`
 	VendorID	string		`json:"vendor_id"`
 	ProductID	string		`json:"product_id"`
+	SerialNum	string		`json:"serial_num"`
 	VendorName	string		`json:"vendor_name"`
 	ProductName	string		`json:"product_name"`
-	SerialNum	string		`json:"serial_num"`
+	ProductVer	string		`json:"product_ver"`
+	SoftwareID	string		`json:"software_id"`
 	DeviceSN	string		`json:"device_sn" csv:"-" nvp:"-"`
 	FactorySN	string		`json:"factory_sn" csv:"-" nvp:"-"`
 	DescriptorSN	string		`json:"descriptor_sn" csv:"-" nvp:"-"`
-	ProductVer	string		`json:"product_ver"`
-	SoftwareID	string		`json:"software_id"`
 }
 
 func NewDeviceInfo(d *Device) (di *DeviceInfo, e error) {
@@ -50,11 +50,11 @@ func NewDeviceInfo(d *Device) (di *DeviceInfo, e error) {
 	if di.HostName, e = os.Hostname(); e != nil {es = append(es, "HostName")}
 	if di.VendorName, e = d.VendorName(); e != nil {es = append(es, "VendorName")}
 	if di.ProductName, e = d.ProductName(); e != nil {es = append(es, "ProductName")}
+	if di.ProductVer, e = d.ProductVer(); e != nil {es = append(es, "ProductVer")}
+	if di.SoftwareID, e = d.SoftwareID(); e != nil {es = append(es, "SoftwareId")}
 	if di.DeviceSN, e = d.DeviceSN(); e != nil {es = append(es, "DeviceSN")}
 	if di.FactorySN, e = d.FactorySN(); e != nil {es = append(es, "FactorySN")}
 	if di.DescriptorSN, e = d.DescriptorSN(); e != nil {es = append(es, "DescriptorSN")}
-	if di.ProductVer, e = d.ProductVer(); e != nil {es = append(es, "ProductVer")}
-	if di.SoftwareID, e = d.SoftwareID(); e != nil {es = append(es, "SoftwareId")}
 
 	di.SerialNum = di.DeviceSN
 

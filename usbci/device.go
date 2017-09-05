@@ -27,134 +27,119 @@ import (
 // config descriptor of the active config, and the size of the data buffer
 // required by the device for vendor commands sent via control transfer.
 type Device struct {
+
 	*gousb.Device
-	manufacturerIx int	// Index of Manufacturer String Descriptor
-	productIx int		// Index of Product String Descriptor
-	serialIx int		// Index of Serial Number String Descriptor
+
+	Info struct {
+		HostName	string	`json:"host_name"`
+		VendorID	string	`json:"vendor_id"`
+		ProductID	string	`json:"product_id"`
+		VendorName	string	`json:"vendor_name"`
+		ProductName	string	`json:"product_name"`
+		SerialNumber	string	`json:"serial_number"`
+		USBSpec		string	`json:"usb_spec"`
+		USBClass	string	`json:"usb_class"`
+		USBSubclass	string	`json:"usb_subclass"`
+		USBProtocol	string	`json:"usb_protocol"`
+		DeviceSpeed	string	`json:"device_speed"`
+		DeviceVer	string	`json:"device_ver"`
+		MaxPktSize	string	`json:"max_pkt_size"`
+		BusNumber	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
+		BusAddress	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
+		Vendor0		string	`json:"vendor0,omitempty" xml:",omitempty" csv:",omitempty" nvp:"omitempty"`
+		Vendor1		string	`json:"vendor1,omitempty" xml:",omitempty" csv:",omitempty" nvp:"omitempty"`
+		Vendor2		string	`json:"vendor2,omitempty" xml:",omitempty" csv:",omitempty" nvp:"omitempty"`
+		Vendor3		string	`json:"vendor3,omitempty" xml:",omitempty" csv:",omitempty" nvp:"omitempty"`
+		Vendor4		string	`json:"vendor4,omitempty" xml:",omitempty" csv:",omitempty" nvp:"omitempty"`
+		Vendor5		string	`json:"vendor5,omitempty" xml:",omitempty" csv:",omitempty" nvp:"omitempty"`
+		Vendor6		string	`json:"vendor6,omitempty" xml:",omitempty" csv:",omitempty" nvp:"omitempty"`
+		Vendor7		string	`json:"vendor7,omitempty" xml:",omitempty" csv:",omitempty" nvp:"omitempty"`
+		Vendor8		string	`json:"vendor8,omitempty" xml:",omitempty" csv:",omitempty" nvp:"omitempty"`
+		Vendor9		string	`json:"vendor9,omitempty" xml:",omitempty" csv:",omitempty" nvp:"omitempty"`
+	}
 }
 
 // NewDevice constructs a new Device.
-func NewDevice(d *gousb.Device) (*Device, error) {
+func NewDevice(gd *gousb.Device) (this *Device, err error) {
 
-	nd := &Device{d, 0, 0, 0}
-
-	dd, err := NewDeviceDescriptor(nd)
-
-	if err == nil {
-		nd.manufacturerIx = int(dd.ManufacturerIndex)
-		nd.productIx = int(dd.ProductIndex)
-		nd.serialIx = int(dd.SerialIndex)
+	this = &Device{gd,
+		&Device.Info{
+			VendorID: this.Desc.Vendor.String(),
+			ProductID: this.Desc.Product.String(),
+			USBSpec: this.Desc.Spec.String(),
+			USBClass: this.Desc.Class.String(),
+			USBSubclass: this.Desc.SubClass.String(),
+			USBProtocol: this.Desc.Protocol.String(),
+			DeviceSpeed: this.Desc.Speed.String(),
+			DeviceVer: this.Desc.Device.String(),
+			MaxPktSize: strconv.Itoa(this.Desc.MaxControlPacketSize),
+			BusNumber: strconv.Itoa(this.Desc.Bus),
+			BusAddress: strconv.Itoa(this.Desc.Address)
+		}
 	}
 
-	return nd, err
+	errs := []string
+
+	if this.Info.Hostname, e = os.Hostname(); e != nil {errs = append(errs, "HostName")}
+	if this.Info.VendorName, e = this.Manufacturer(); e != nil {errs = append(errs, "VendorName")}
+	if this.Info.ProductName, e = this.Product(); e != nil {errs = append(errs, "ProductName")}
+	if this.Info.SerialNumber, e = this.SerialNumber(); e != nil {errs = append(errs, "SerialNumber")}
+
+	if len(errs) > 0 {
+		err = errors.New("getter errors: " + strings.Join(errs, ","))
+	}
+
+	return this, err
 }
 
 // Convenience method to retrieve device serial number.
-func (this *Device) ID() (string, error) {
-	return this.DescriptorSN()
+func (this *Device) ID() (sn string, err error) {
+	if len(this.Info.SerialNumber) == 0 {
+		err = errors.New("no unique identifier")
+	}
+	return this.Info.SerialNumber, err
 }
 
-// Convenience method to help identify object type to other apps.
 func (this *Device) Type() (string) {
-	return reflect.TypeOf(this).String()
+	return reflect.TypeOf(*this).String()
 }
 
-// BusNumber retrieves the USB bus number of the device.
-func (this *Device) BusNumber() string {
-	return strconv.Itoa(this.Desc.Bus)
+func (this *Device) Save(fn string) (error) {
+	return gocmdb.SaveObject(*this, fn)
 }
 
-// BusAddress retrieves address of the device on the USB bus.
-func (this *Device) BusAddress() string {
-	return strconv.Itoa(this.Desc.Address)
+func (this *Device) Restore(fn string) (error) {
+	return gocmdb.RestoreObject(fn, this)
 }
 
-// DeviceSpeed retrieves the negotiated operating speed of the device.
-func (this *Device) DeviceSpeed() string {
-	return this.Desc.Speed.String()
+func (this *Device) Matches(i interface{}) (bool) {
+	return reflect.DeepEqual(this.Info, i.Info)
 }
 
-// USBSpec retrieves the USB specification release number of the device.
-func (this *Device) USBSpec() string {
-	return this.Desc.Spec.String()
-}
-
-// DeviceVer retrieves the major/minor version number ofthe device.
-func (this *Device) DeviceVer() string {
-	return this.Desc.Device.String()
-}
-
-// GetVendorId retrieves the USB vendor ID of the device.
-func (this *Device) VendorID() string {
-	return this.Desc.Vendor.String()
-}
-
-// ProductID retrieves the USB product ID of the device.
-func (this *Device) ProductID() string {
-	return this.Desc.Product.String()
-}
-
-// USBClass retrieves the USB class of the device.
-func (this *Device) USBClass() string {
-	return this.Desc.Class.String()
-}
-
-// USBSubclass retrieves the USB subclass of the device.
-func (this *Device) USBSubclass() string {
-	return this.Desc.SubClass.String()
-}
-
-// USBProtocol retrieves the USB protocol of the device.
-func (this *Device) USBProtocol() string {
-	return this.Desc.Protocol.String()
-}
-
-// MaxPktSize retrieves the maximum size of the control transfer.
-func (this *Device) MaxPktSize() string {
-	return strconv.Itoa(this.Desc.MaxControlPacketSize)
-}
-
-// VendorName retrieves the manufacturer name from device descriptor.
-func (this *Device) VendorName() (value string, err error) {
-
-	if this.manufacturerIx > 0 {
-		value, err = this.GetStringDescriptor(this.manufacturerIx)
+func (this *Device) Compare(fn string) (ss [][]string, err error) {
+	d := new(Device)
+	if err = d.Restore(fn); err != nil {
+		return ss, err
 	}
-
-	if err != nil {
-		err = fmt.Errorf("%s: %v", gocmdb.FunctionInfo(), err)
-	}
-
-	return value, err
+	return gocmdb.CompareObjects(*this.Info, *d.Info)
 }
 
-// ProductName retrieves the product name from device descriptor.
-func (this *Device) ProductName() (value string, err error) {
-
-	if this.productIx > 0 {
-		value, err = this.GetStringDescriptor(this.productIx)
-	}
-
-	if err != nil {
-		err = fmt.Errorf("%s: %v", gocmdb.FunctionInfo(), err)
-	}
-
-	return value, err
+func (this *Device) Bare() ([]byte) {
+	return []byte(fmt.Sprintf("%s,%s", this.Info.HostName, this.Info.SerialNumber))
 }
 
-// GetDescriptorSN retrieves the serial number of the device from the
-// device descriptor. Changes made to the serial number on the device using a
-// control transfer are not reflected in the device descriptor until the device
-// is power-cycled or performs a device reset.
-func (this *Device) DescriptorSN() (value string, err error) {
+func (this *Device) JSON() ([]byte, error) {
+	return json.Marshal(*this.Info)
+}
 
-	if this.serialIx > 0 {
-		value, err = this.GetStringDescriptor(this.serialIx)
-	}
+func (this *Device) XML() ([]byte, error) {
+	return xml.Marshal(*this.Info)
+}
 
-	if err != nil {
-		err = fmt.Errorf("%s: %v", gocmdb.FunctionInfo(), err)
-	}
+func (this *Device) CSV() ([]byte, error) {
+	return gocmdb.ObjectToCSV(*this.Info)
+}
 
-	return value, err
+func (this *Device) NVP() ([]byte, error) {
+	return gocmdb.ObjectToNVP(*this.Info)
 }

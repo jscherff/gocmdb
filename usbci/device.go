@@ -15,11 +15,14 @@
 package usbci
 
 import (
-	"github.com/google/gousb"
-	"github.com/jscherff/gocmdb"
 	"reflect"
 	"strconv"
+	"strings"
 	"fmt"
+	"os"
+
+	"github.com/google/gousb"
+	"github.com/jscherff/gocmdb"
 )
 
 // Device represents a USB device. The Device struct Desc field contains all
@@ -27,119 +30,65 @@ import (
 // config descriptor of the active config, and the size of the data buffer
 // required by the device for vendor commands sent via control transfer.
 type Device struct {
-
 	*gousb.Device
-
-	Info struct {
-		HostName	string	`json:"host_name"`
-		VendorID	string	`json:"vendor_id"`
-		ProductID	string	`json:"product_id"`
-		VendorName	string	`json:"vendor_name"`
-		ProductName	string	`json:"product_name"`
-		SerialNumber	string	`json:"serial_number"`
-		USBSpec		string	`json:"usb_spec"`
-		USBClass	string	`json:"usb_class"`
-		USBSubclass	string	`json:"usb_subclass"`
-		USBProtocol	string	`json:"usb_protocol"`
-		DeviceSpeed	string	`json:"device_speed"`
-		DeviceVer	string	`json:"device_ver"`
-		MaxPktSize	string	`json:"max_pkt_size"`
-		BusNumber	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
-		BusAddress	string	`json:"-" xml:"-" csv:"-" nvp:"-"`
-		Vendor0		string	`json:"vendor0,omitempty" xml:",omitempty" csv:",omitempty" nvp:"omitempty"`
-		Vendor1		string	`json:"vendor1,omitempty" xml:",omitempty" csv:",omitempty" nvp:"omitempty"`
-		Vendor2		string	`json:"vendor2,omitempty" xml:",omitempty" csv:",omitempty" nvp:"omitempty"`
-		Vendor3		string	`json:"vendor3,omitempty" xml:",omitempty" csv:",omitempty" nvp:"omitempty"`
-		Vendor4		string	`json:"vendor4,omitempty" xml:",omitempty" csv:",omitempty" nvp:"omitempty"`
-		Vendor5		string	`json:"vendor5,omitempty" xml:",omitempty" csv:",omitempty" nvp:"omitempty"`
-		Vendor6		string	`json:"vendor6,omitempty" xml:",omitempty" csv:",omitempty" nvp:"omitempty"`
-		Vendor7		string	`json:"vendor7,omitempty" xml:",omitempty" csv:",omitempty" nvp:"omitempty"`
-		Vendor8		string	`json:"vendor8,omitempty" xml:",omitempty" csv:",omitempty" nvp:"omitempty"`
-		Vendor9		string	`json:"vendor9,omitempty" xml:",omitempty" csv:",omitempty" nvp:"omitempty"`
-	}
+	*DevInfo
 }
 
-// NewDevice constructs a new Device.
-func NewDevice(gd *gousb.Device) (this *Device, err error) {
+// NewDevice converts an existing gousb device to a usbci Device.
+func NewDevice(gd *gousb.Device) (*Device, error) {
 
-	this = &Device{gd,
-		&Device.Info{
-			VendorID: this.Desc.Vendor.String(),
-			ProductID: this.Desc.Product.String(),
-			USBSpec: this.Desc.Spec.String(),
-			USBClass: this.Desc.Class.String(),
-			USBSubclass: this.Desc.SubClass.String(),
-			USBProtocol: this.Desc.Protocol.String(),
-			DeviceSpeed: this.Desc.Speed.String(),
-			DeviceVer: this.Desc.Device.String(),
-			MaxPktSize: strconv.Itoa(this.Desc.MaxControlPacketSize),
-			BusNumber: strconv.Itoa(this.Desc.Bus),
-			BusAddress: strconv.Itoa(this.Desc.Address)
-		}
+	var err error
+	var errs []string
+
+	di := &DevInfo{}
+	this := &Device{gd,di}
+
+	if this.HostName, err = os.Hostname(); err != nil {
+		errs = append(errs, "HostName")
+	}
+	if this.VendorName, err = this.Manufacturer(); err != nil {
+		errs = append(errs, "VendorName")
+	}
+	if this.ProductName, err = this.Product(); err != nil {
+		errs = append(errs, "ProductName")
+	}
+	if this.SerialNum, err = this.SerialNumber(); err != nil {
+		errs = append(errs, "SerialNum")
 	}
 
-	errs := []string
-
-	if this.Info.Hostname, e = os.Hostname(); e != nil {errs = append(errs, "HostName")}
-	if this.Info.VendorName, e = this.Manufacturer(); e != nil {errs = append(errs, "VendorName")}
-	if this.Info.ProductName, e = this.Product(); e != nil {errs = append(errs, "ProductName")}
-	if this.Info.SerialNumber, e = this.SerialNumber(); e != nil {errs = append(errs, "SerialNumber")}
+	this.VendorID = this.Desc.Vendor.String()
+	this.ProductID = this.Desc.Product.String()
+	this.BusNumber = fmt.Sprintf("%03d", this.Desc.Bus)
+	this.BusAddress = fmt.Sprintf("%03d", this.Desc.Address)
+	this.USBSpec = this.Desc.Spec.String()
+	this.USBClass = this.Desc.Class.String()
+	this.USBSubclass = this.Desc.SubClass.String()
+	this.USBProtocol = this.Desc.Protocol.String()
+	this.DeviceSpeed = this.Desc.Speed.String()
+	this.DeviceVer = this.Desc.Device.String()
+	this.MaxPktSize = strconv.Itoa(this.Desc.MaxControlPacketSize)
+	this.ObjectType = this.Type()
 
 	if len(errs) > 0 {
-		err = errors.New("getter errors: " + strings.Join(errs, ","))
+		err = fmt.Errorf("getter errors: ", strings.Join(errs, ","))
+		err = gocmdb.ErrorDecorator(err)
 	}
 
 	return this, err
 }
 
+// Refresh items whose underlying values may have chanegd.
+func (this *Device) Refresh() (err error) {
+	this.SerialNum, err = this.SerialNumber()
+	return err
+}
+
 // Convenience method to retrieve device serial number.
-func (this *Device) ID() (sn string, err error) {
-	if len(this.Info.SerialNumber) == 0 {
-		err = errors.New("no unique identifier")
-	}
-	return this.Info.SerialNumber, err
+func (this *Device) ID() (string) {
+	return this.SerialNum
 }
 
+// Convenience method to help identify object type to other apps.
 func (this *Device) Type() (string) {
-	return reflect.TypeOf(*this).String()
-}
-
-func (this *Device) Save(fn string) (error) {
-	return gocmdb.SaveObject(*this, fn)
-}
-
-func (this *Device) Restore(fn string) (error) {
-	return gocmdb.RestoreObject(fn, this)
-}
-
-func (this *Device) Matches(i interface{}) (bool) {
-	return reflect.DeepEqual(this.Info, i.Info)
-}
-
-func (this *Device) Compare(fn string) (ss [][]string, err error) {
-	d := new(Device)
-	if err = d.Restore(fn); err != nil {
-		return ss, err
-	}
-	return gocmdb.CompareObjects(*this.Info, *d.Info)
-}
-
-func (this *Device) Bare() ([]byte) {
-	return []byte(fmt.Sprintf("%s,%s", this.Info.HostName, this.Info.SerialNumber))
-}
-
-func (this *Device) JSON() ([]byte, error) {
-	return json.Marshal(*this.Info)
-}
-
-func (this *Device) XML() ([]byte, error) {
-	return xml.Marshal(*this.Info)
-}
-
-func (this *Device) CSV() ([]byte, error) {
-	return gocmdb.ObjectToCSV(*this.Info)
-}
-
-func (this *Device) NVP() ([]byte, error) {
-	return gocmdb.ObjectToNVP(*this.Info)
+	return reflect.TypeOf(this).String()
 }

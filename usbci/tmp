@@ -1,0 +1,28 @@
+device.go:func NewDevice(gd *gousb.Device) (*Device, error) {
+device.go:func (this *Device) Refresh() (err error) {
+device.go:func (this *Device) ID() (string) {
+device.go:func (this *Device) Type() (string) {
+devinfo.go:func (this *DevInfo) Save(fn string) (error) {
+devinfo.go:func (this *DevInfo) Restore(fn string) (error) {
+devinfo.go:func (this *DevInfo) Matches(i interface{}) (bool) {
+devinfo.go:func (this *DevInfo) Compare(fn string) (ss [][]string, err error) {
+devinfo.go:func (this *DevInfo) Filename() (string) {
+devinfo.go:func (this *DevInfo) Bare() ([]byte) {
+devinfo.go:func (this *DevInfo) JSON() ([]byte, error) {
+devinfo.go:func (this *DevInfo) XML() ([]byte, error) {
+devinfo.go:func (this *DevInfo) CSV() ([]byte, error) {
+devinfo.go:func (this *DevInfo) NVP() ([]byte, error) {
+
+magtek/device.go:func NewDevice(gd *gousb.Device) (*Device, error) {
+magtek/device.go:func (this *Device) GetDeviceSN() (string, error) {
+magtek/device.go:func (this *Device) GetFactorySN() (string, error) {
+magtek/device.go:func (this *Device) GetSoftwareID() (string, error) {
+magtek/device.go:func (this *Device) GetProductVer() (string, error) {
+magtek/device.go:func (this *Device) SetDeviceSN(val string) (error) {
+magtek/device.go:func (this *Device) EraseDeviceSN() (error) {
+magtek/device.go:func (this *Device) SetFactorySN(val string) (error) {
+magtek/device.go:func (this *Device) CopyFactorySN(n int) (error) {
+magtek/device.go:func (this *Device) Reset() (error) {
+magtek/device.go:func (this *Device) findBufferSize() (error) {
+magtek/device.go:func (this *Device) getProperty(id uint8) (val string, err error) {
+magtek/device.go:func (this *Device) setProperty(id uint8, val string) (err error) {

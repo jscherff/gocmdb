@@ -16,6 +16,12 @@ package webapi
 
 import "encoding/json"
 
+const(
+	FieldNameIx int = 0
+	OldValueIx int = 1
+	NewValueIx int = 2
+)
+
 type Change struct {
 	FieldName	string	`json:"omitempty"`
 	OldValue	string	`json:"omitempty"`
@@ -24,14 +30,14 @@ type Change struct {
 
 type Changes []Change
 
-func NewChanges(ss [][]string) (c Changes) {
+func NewChanges(ss [][]string) (ch Changes) {
 
 	for _, s := range ss {
 		if len(s) != 3 {continue}
-		c = append(c, Change{s[0], s[1], s[2]})
+		ch = append(ch, Change{s[FieldNameIx], s[OldValueIx], s[NewValueIx]})
 	}
 
-	return c
+	return ch
 }
 
 func (this *Changes) JSON() ([]byte, error) {

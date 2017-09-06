@@ -25,7 +25,6 @@ const (
 	MagnesafeInsertHidPID uint16 = 0x0013
 	MagnesafeWirelessHidPID uint16 = 0x0014
 
-	BufferSizes = []int {24, 60}
 	BufferSizeSureswipe int = 24
 	BufferSizeMagnesafe int = 60
 

@@ -18,26 +18,30 @@ import (
 	"path/filepath"
 	"encoding/json"
 	"encoding/csv"
-	"runtime"
 	"reflect"
+	"runtime"
 	"strings"
 	"bytes"
 	"fmt"
 	"os"
 )
 
-// FunctionInfo returns function filename, line number, and function name
-// for error reporting.
-func FunctionInfo() string {
+// ErrorDecorator prepends function filename, line number, and function name
+// to error messages.
+func ErrorDecorator(ue error) (de error) {
+
+	var msg string
 
 	pc, file, line, success := runtime.Caller(1)
 	function := runtime.FuncForPC(pc)
 
-	if !success {
-		return "Unknown goroutine"
+	if success {
+		msg = fmt.Sprintf("%s:%d: %s()", filepath.Base(file), line, function.Name())
+	} else {
+		msg = "unknown goroutine"
 	}
 
-	return fmt.Sprintf("%s:%d: %s()", filepath.Base(file), line, function.Name())
+	return fmt.Errorf("%s: %v", msg, ue)
 }
 
 // ObjectToCSV converts a single-tier struct to a string suitable for writing
@@ -49,18 +53,25 @@ func ObjectToCSV (t interface{}) (b []byte, e error) {
 	var ssi [][]string
 
 	if ssi, e = ObjectToSlice(t, "csv"); e == nil {
+
 		ss := make([][]string, 2)
+
 		for _, si := range ssi {
 			 ss[NameIx] = append(ss[NameIx], si[NameIx])
 			 ss[ValueIx] = append(ss[ValueIx], si[ValueIx])
 		}
+
 		bb := new(bytes.Buffer)
 		cw := csv.NewWriter(bb)
 		cw.WriteAll(ss)
-		b, e = bb.Bytes(), cw.Error()
+
+		if b, e = bb.Bytes(), cw.Error(); e != nil {
+			e = ErrorDecorator(e)
+		}
+
 	}
 
-	return b, e
+	return b, e // already decorated
 }
 
 // ObjectToNVP converts a single-tier struct to a string containing name-
@@ -70,14 +81,17 @@ func ObjectToNVP (t interface{}) (b []byte, e error) {
 	var ssi [][]string
 
 	if ssi, e = ObjectToSlice(t, "nvp"); e == nil {
+
 		var s string
+
 		for _, si := range ssi {
 			s += fmt.Sprintf("%s:%s\n", si[NameIx], si[ValueIx])
 		}
+
 		b = []byte(s)
 	}
 
-	return b, e
+	return b, e // already decorated
 }
 
 // SaveObject persists an object to a JSON file.
@@ -89,6 +103,10 @@ func SaveObject(t interface{}, fn string) (e error) {
 	if e == nil {
 		je := json.NewEncoder(fh)
 		e = je.Encode(&t)
+	}
+
+	if e != nil {
+		e = ErrorDecorator(e)
 	}
 
 	return e
@@ -105,6 +123,10 @@ func RestoreObject(fn string, t interface{}) (e error) {
 		e = jd.Decode(&t)
 	}
 
+	if e != nil {
+		e = ErrorDecorator(e)
+	}
+
 	return e
 }
 
@@ -114,24 +136,30 @@ func RestoreObject(fn string, t interface{}) (e error) {
 // in field values, the function returns a list of differences.
 func CompareObjects(a interface{}, b interface{}) (ss[][]string, e error) {
 
-	if reflect.DeepEqual(a, b) {return ss, e}
+	if reflect.DeepEqual(a, b) {
+		return ss, e
+	}
 
 	var as, bs [][]string
 
-	as, e = ObjectToSlice(a, "")
-	if e != nil {return ss, e}
+	if as, e = ObjectToSlice(a, "compare"); e != nil {
+		return ss, e // already decorated
+	}
 
-	bs, e = ObjectToSlice(b, "")
-	if e != nil {return ss, e}
+	if bs, e = ObjectToSlice(b, "compare"); e != nil {
+		return ss, e // already decorated
+	}
 
 	if al, bl := len(as), len(bs); al != bl {
-		return ss, fmt.Errorf("field count mismatch: %d != %d", al, bl)
+		e = fmt.Errorf("field count mismatch: %d != %d", al, bl)
+		return ss, ErrorDecorator(e)
 	}
 
 	for i := 0; i < len(as); i++ {
 
 		if as[i][NameIx] != bs[i][NameIx] {
-			return ss, fmt.Errorf("field name mismatch: %q != %q", i, as[i][NameIx], bs[i][NameIx])
+			e = fmt.Errorf("field name mismatch: %q != %q", i, as[i][NameIx], bs[i][NameIx])
+			return ss, ErrorDecorator(e)
 		}
 
 		if as[i][ValueIx] != bs[i][ValueIx] {
@@ -153,7 +181,8 @@ func ObjectToSlice(t interface{}, tag string) (ss[][]string, e error) {
 	v := reflect.ValueOf(t)
 
 	if v.Type().Kind() != reflect.Struct {
-		return ss, fmt.Errorf("%s: kind is not 'struct'", FunctionInfo())
+		e = fmt.Errorf("%s: kind is not 'struct'")
+		return ss, ErrorDecorator(e)
 	}
 
 	OUTER:

@@ -15,14 +15,16 @@
 package magtek
 
 import (
-	"github.com/google/gousb"
-	"github.com/jscherff/gocmdb"
-	"github.com/jscherff/gocmdb/usbci"
 	"reflect"
 	"strconv"
+	"strings"
 	"math"
 	"time"
 	"fmt"
+
+	"github.com/google/gousb"
+	"github.com/jscherff/gocmdb"
+	"github.com/jscherff/gocmdb/usbci"
 )
 
 // Device represents a USB device. The Device struct Desc field contains all
@@ -31,47 +33,92 @@ import (
 // required by the device for vendor commands sent via control transfer.
 type Device struct {
 	*usbci.Device
-	DeviceSN string
-	FactorySN string
-	SoftwareID string
-	ProductVer string
-	BufferSize int
+	BufferSize int		`json:"bufer_size" csv:"-" nvp:"-"`
+	DeviceSN string		`json:"device_sn" csv:"-" nvp:"-"`
+	FactorySN string	`json:"factory_sn" csv:"-" nvp:"-"`
+	DescriptorSN string	`json:"descriptor_sn" csv:"-" nvp:"-"`
 }
 
-// NewDevice constructs a new Device.
-func NewDevice(gd *gousb.Device) (this *Device, err error) {
+var BufferSizes = []int{24, 60}
+
+// NewDevice converts an existing gousb device to a magtek Device.
+func NewDevice(gd *gousb.Device) (*Device, error) {
+
+	var err error
+	var errs []string
 
 	ud, err := usbci.NewDevice(gd)
 
 	if err != nil {
-		return ud, err
+		return nil, gocmdb.ErrorDecorator(err)
 	}
 
-	this = &Device{ud, 0}
+	this := &Device{ud, 0, "", "", ""}
 
-	errs := []string
+	if this.BufferSize, err = this.GetBufferSize(); err != nil {
+		return nil, gocmdb.ErrorDecorator(err)
+	}
+	if this.SoftwareID, err = this.GetSoftwareID(); err != nil {
+		errs = append(errs, "SoftwareID")
+	}
+	if this.ProductVer, err = this.GetProductVer(); err != nil {
+		errs = append(errs, "ProductVer")
+	}
+	if this.DeviceSN, err = this.GetDeviceSN(); err != nil {
+		errs = append(errs, "DeviceSN")
+	}
+	if this.FactorySN, err = this.GetFactorySN(); err != nil {
+		errs = append(errs, "FactorySN")
+	}
+	if this.DescriptorSN, err = this.SerialNumber(); err != nil {
+		errs = append(errs, "DescriptorSN")
+	}
 
-	if this.DeviceSN, e = this.DeviceSN(); e != nil {errs = append(errs, "DeviceSN")}
-	if this.FactorySN, e = this.FactorySN(); e != nil {errs = append(errs, "FactorySN")}
-	if this.SoftwareID, e = this.SoftwareID(); e != nil {errs = append(errs, "SoftwareID")}
-	if this.ProductVer, e = this.ProductVer(); e != nil {errs = append(errs, "ProductVer")}
-	if this.BufferSize, e = this.findBufferSize(); e != nil {errs = append(errs, "BufferSize")}
+	this.SerialNum = this.DeviceSN
+	this.ObjectType = this.Type()
 
-	this.Info.SerialNumber = this.DeviceSN
-	this.Info.Vendor0 = this.FactorySN
-	this.Info.Vendor1 = this.SoftwareID
-	this.Info.Vendor2 = this.ProductVer
+	this.Vendor0 = "BufferSize:" + strconv.Itoa(this.BufferSize)
+	this.Vendor1 = "DeviceSN:" + this.DeviceSN
+	this.Vendor2 = "FactorySN:" + this.FactorySN
+	this.Vendor3 = "DescriptorSN:" + this.DescriptorSN
 
 	if len(errs) > 0 {
-		err = errors.New("getter errors: " + strings.Join(errs, ","))
+		err = fmt.Errorf("getter errors: ", strings.Join(errs, ","))
+		err = gocmdb.ErrorDecorator(err)
 	}
 
 	return this, err
 }
 
+// Refresh items whose underlying values may have chanegd.
+func (this *Device) Refresh() (error) {
+
+	var err error
+	var errs []string
+
+	if this.DeviceSN, err = this.GetDeviceSN(); err != nil {
+		errs = append(errs, "DeviceSN")
+	}
+	if this.FactorySN, err = this.GetFactorySN(); err != nil {
+		errs = append(errs, "FactorySN")
+	}
+	if this.DescriptorSN, err = this.SerialNumber(); err != nil {
+		errs = append(errs, "DescriptorSN")
+	}
+
+	this.SerialNum = this.DeviceSN
+
+	if len(errs) > 0 {
+		err = fmt.Errorf("getter errors: ", strings.Join(errs, ","))
+		err = gocmdb.ErrorDecorator(err)
+	}
+
+	return err
+}
+
 // Convenience method to retrieve device serial number.
-func (this *Device) ID() (string, error) {
-	return this.DeviceSN()
+func (this *Device) ID() (string) {
+	return this.SerialNum
 }
 
 // Convenience method to help identify object type to other apps.
@@ -80,24 +127,24 @@ func (this *Device) Type() (string) {
 }
 
 // DeviceSN retrieves the device configurable serial number from NVRAM.
-func (this *Device) DeviceSN() (string, error) {
+func (this *Device) GetDeviceSN() (string, error) {
 	return this.getProperty(PropDeviceSN)
 }
 
 // FactorySN retrieves the device factory serial number from NVRAM.
-func (this *Device) FactorySN() (string, error) {
-	val, err = this.getProperty(PropFactorySN)
+func (this *Device) GetFactorySN() (string, error) {
+	val, err := this.getProperty(PropFactorySN)
 	if len(val) <= 1 {val = ""}
 	return val, err
 }
 
 // SoftwareID retrieves the software ID of the device from NVRAM.
-func (this *Device) SoftwareID() (string, error) {
+func (this *Device) GetSoftwareID() (string, error) {
 	return this.getProperty(PropSoftwareID)
 }
 
 // ProductVer retrieves the product version of the device from NVRAM.
-func (this *Device) ProductVer() (string, error) {
+func (this *Device) GetProductVer() (string, error) {
 	val, err := this.getProperty(PropProductVer)
 	if len(val) <= 1 {val = ""}
 	return val, err
@@ -123,18 +170,18 @@ func (this *Device) SetFactorySN(val string) (error) {
 // serial number to the configurable serial number in NVRAM.
 func (this *Device) CopyFactorySN(n int) (error) {
 
-	val, err := this.FactorySN()
+	val, err := this.GetFactorySN()
 
 	if err != nil {
-		return fmt.Errorf("%s: %v", gocmdb.FunctionInfo(), err)
+		return gocmdb.ErrorDecorator(err)
 	}
 
 	if len(val) == 0 {
-		return fmt.Errorf("%s: no factory serial number", gocmdb.FunctionInfo())
+		return gocmdb.ErrorDecorator(fmt.Errorf("no factory serial number"))
 	}
 
 	n = int(math.Min(float64(n), float64(len(val))))
-	err = this.SetDeviceSN(s[:n])
+	err = this.SetDeviceSN(val[:n])
 
 	return err
 }
@@ -153,7 +200,7 @@ func (this *Device) Reset() (error) {
 		data)
 
 	if err != nil {
-		err = fmt.Errorf("%s: %v)", gocmdb.FunctionInfo(), err)
+		err = gocmdb.ErrorDecorator(err)
 	}
 
 	data = make([]byte, this.BufferSize)
@@ -166,11 +213,11 @@ func (this *Device) Reset() (error) {
 		data)
 
 	if err != nil {
-		return fmt.Errorf("%s: %v", gocmdb.FunctionInfo(), err)
+		return gocmdb.ErrorDecorator(err)
 	}
 
 	if data[0] > 0x00 {
-		err = fmt.Errorf("%s: command error: %d", gocmdb.FunctionInfo(), int(data[0]))
+		err = gocmdb.ErrorDecorator(fmt.Errorf("command error: %d", int(data[0])))
 	}
 
 	time.Sleep(5 * time.Second)
@@ -178,14 +225,13 @@ func (this *Device) Reset() (error) {
 	return err
 }
 
-// findBufferSize uses trial and error to find the control transfer data
+// GetBufferSize uses trial and error to find the control transfer data
 // buffer size of the device. Failure to use the correct size for control
 // transfers carrying vendor commands will result in a LIBUSB_ERROR_PIPE
 // error.
-func (this *Device) findBufferSize() (error) {
+func (this *Device) GetBufferSize() (size int, err error) {
 
-	var rc, size int
-	var err error
+	var rc int
 
 	for _, size = range BufferSizes {
 
@@ -199,7 +245,7 @@ func (this *Device) findBufferSize() (error) {
 			usbci.ControlInterface,
 			data)
 
-		data = make([]byte, size)
+		if err != nil {continue}
 
 		rc, err = this.Control(
 			usbci.RequestDirectionIn + usbci.RequestTypeClass + usbci.RequestRecipientDevice,
@@ -208,17 +254,18 @@ func (this *Device) findBufferSize() (error) {
 			usbci.ControlInterface,
 			data)
 
+		if err != nil {continue}
+
 		if rc == size {
-			this.BufferSize = size
 			break
 		}
 	}
 
 	if err != nil {
-		err = fmt.Errorf("%s: unsupported device", gocmdb.FunctionInfo())
+		err = gocmdb.ErrorDecorator(fmt.Errorf("unsupported device"))
 	}
 
-	return err
+	return size, err
 }
 
 // getProperty retrieves a property from device NVRAM using low-level commands.
@@ -235,7 +282,7 @@ func (this *Device) getProperty(id uint8) (val string, err error) {
 		data)
 
 	if err != nil {
-		return val, fmt.Errorf("%s: %v", gocmdb.FunctionInfo(), err)
+		return val, gocmdb.ErrorDecorator(err)
 	}
 
 	data = make([]byte, this.BufferSize)
@@ -248,11 +295,11 @@ func (this *Device) getProperty(id uint8) (val string, err error) {
 		data)
 
 	if err != nil {
-		return val, fmt.Errorf("%s: %v", gocmdb.FunctionInfo(), err)
+		return val, gocmdb.ErrorDecorator(err)
 	}
 
 	if data[0] > 0x00 {
-		return val, fmt.Errorf("%s: command error: %d", gocmdb.FunctionInfo(), int(data[0]))
+		return val, gocmdb.ErrorDecorator(fmt.Errorf("command error: %d", int(data[0])))
 	}
 
 	if data[1] > 0x00 {
@@ -264,10 +311,6 @@ func (this *Device) getProperty(id uint8) (val string, err error) {
 
 // setProperty configures a property in device NVRAM using low-level commands.
 func (this *Device) setProperty(id uint8, val string) (err error) {
-
-	if len(val) > this.BufferSize - 3 {
-		return fmt.Errorf("%s: property length > data buffer", gocmdb.FunctionInfo())
-	}
 
 	data := make([]byte, this.BufferSize)
 	copy(data[0:], []byte{CommandSetProp, uint8(len(val)+1), id})
@@ -281,7 +324,7 @@ func (this *Device) setProperty(id uint8, val string) (err error) {
 		data)
 
 	if err != nil {
-		return fmt.Errorf("%s: %v", gocmdb.FunctionInfo(), err)
+		return gocmdb.ErrorDecorator(err)
 	}
 
 	data = make([]byte, this.BufferSize)
@@ -294,13 +337,16 @@ func (this *Device) setProperty(id uint8, val string) (err error) {
 		data)
 
 	if err != nil {
-		return fmt.Errorf("%s: %v", gocmdb.FunctionInfo(), err)
+		return gocmdb.ErrorDecorator(err)
 	}
 
 	if data[0] > 0x00 {
-		err = fmt.Errorf("%s: command error: %d", gocmdb.FunctionInfo(), int(data[0]))
+		err = gocmdb.ErrorDecorator(fmt.Errorf("command error: %d", int(data[0])))
+	}
+
+	if err == nil {
+		err = this.Refresh()
 	}
 
 	return err
 }
-

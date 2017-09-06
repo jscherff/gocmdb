@@ -15,36 +15,89 @@
 package gocmdb
 
 type Reportable interface {
-	ID() (string, error)
+	ID() (string)
+	Type() (string)
+	Bare() ([]byte)
+	JSON() ([]byte, error)
+	XML() ([]byte, error)
 	CSV() ([]byte, error)
 	NVP() ([]byte, error)
-	XML() ([]byte, error)
-	JSON() ([]byte, error)
-	Bare() ([]byte)
+	Filename() (string)
 }
 
 type Auditable interface {
-	ID() (string, error)
-	Save(string) (error)
-	Restore(string) (error)
+	ID() (string)
+	Type() (string)
+	Save(string)
+	Restore(string)
+	Matches(interface{})
 	Compare(string) ([][]string, error)
+	Audit(string) (error)
 }
 
 type Registerable interface {
+	ID() (string)
 	Type() (string)
-	ID() (string, error)
 	JSON() ([]byte, error)
 }
 
 type Configurable interface {
-	DeviceSN() (string, error)
+	GetDeviceSN(string) (error)
 	SetDeviceSN(string) (error)
+	EraseDeviceSN() (error)
 	SetFactorySN(string) (error)
 	CopyFactorySN(int) (error)
-	EraseDeviceSN() (error)
+	Refresh() (error)
 	Reset() (error)
 }
 
 type Resettable interface {
 	Reset() (error)
 }
+
+type GenericUSB interface {
+	ID() (string)
+	Type() (string)
+	Save(fn string)
+	Restore(string)
+	Matches(interface{})
+	Compare(string) ([][]string, error)
+	Audit(string) (error)
+
+	Refresh() (error)
+	Reset() (error)
+
+	Bare() ([]byte)
+	JSON() ([]byte, error)
+	XML() ([]byte, error)
+	CSV() ([]byte, error)
+	NVP() ([]byte, error)
+	Filename() (string)
+}
+
+type MagtekUSB interface {
+	ID() (string)
+	Type() (string)
+	Save(fn string)
+	Restore(string)
+	Matches(interface{})
+	Compare(string) ([][]string, error)
+	Audit(string) (error)
+
+	Refresh() (error)
+	Reset() (error)
+
+	Bare() ([]byte)
+	JSON() ([]byte, error)
+	XML() ([]byte, error)
+	CSV() ([]byte, error)
+	NVP() ([]byte, error)
+	Filename() (string)
+
+	GetDeviceSN(string) (error)
+	SetDeviceSN(string) (error)
+	EraseDeviceSN() (error)
+	SetFactorySN(string) (error)
+	CopyFactorySN(int) (error)
+}
+

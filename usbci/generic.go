@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package api
+package usbci
 
 import (
 	"encoding/json"
@@ -51,53 +51,54 @@ const (
 
 	BufferSizeDeviceDescriptor int = 18
 	BufferSizeConfigDescriptor int = 9
+
+	MarshalPrefix string = ""
+	MarshalIndent string = "\t"
 )
 
 // Generic decorates a gousb Device with Generic Properties and API.
 type Generic struct {
 
-	*gousb.Device
+	*gousb.Device		`json:"-" xml:"-" csv:"-" nvp:"-" cmp:"-"`
 
-	HostName	string	`json:"host_name"`
-	VendorID	string	`json:"vendor_id"`
-	ProductID	string	`json:"product_id"`
-	VendorName	string	`json:"vendor_name"`
-	ProductName	string	`json:"product_name"`
-	SerialNum	string	`json:"serial_num"`
-	ProductVer	string	`json:"product_ver"`
-	SoftwareID	string	`json:"software_id"`
+	HostName	string
+	VendorID	string
+	ProductID	string
+	VendorName	string
+	ProductName	string
+	SerialNum	string
+	SoftwareID	string
+	ProductVer	string
+	BufferSize	int
 
-	BusNumber	string	`json:"-" xml:"-" csv:"-" nvp:"-" compare:"-"`
-	BusAddress	string	`json:"-" xml:"-" csv:"-" nvp:"-" compare:"-"`
-	USBSpec		string	`json:"usb_spec" csv:"-" nvp:"-"`
-	USBClass	string	`json:"usb_class" csv:"-" nvp:"-"`
-	USBSubclass	string	`json:"usb_subclass" csv:"-" nvp:"-"`
-	USBProtocol	string	`json:"usb_protocol" csv:"-" nvp:"-"`
-	DeviceSpeed	string	`json:"device_speed" csv:"-" nvp:"-"`
-	DeviceVer	string	`json:"device_ver" csv:"-" nvp:"-"`
-	MaxPktSize	string	`json:"max_pkt_size" csv:"-" nvp:"-"`
-	ObjectType	string	`json:"object_type" csv:"-" nvp:"-"`
+	BusNumber	string	`json:"-" xml:"-" csv:"-" nvp:"-" cmp:"-"`
+	BusAddress	string	`json:"-" xml:"-" csv:"-" nvp:"-" cmp:"-"`
+	USBSpec		string	`csv:"-" nvp:"-"`
+	USBClass	string	`csv:"-" nvp:"-"`
+	USBSubclass	string	`csv:"-" nvp:"-"`
+	USBProtocol	string	`csv:"-" nvp:"-"`
+	DeviceSpeed	string	`csv:"-" nvp:"-"`
+	DeviceVer	string	`csv:"-" nvp:"-"`
+	MaxPktSize	string	`csv:"-" nvp:"-"`
+	ObjectType	string	`csv:"-" nvp:"-"`
 
-	Vendor0		string	`json:"vendor0,omitempty" xml:",omitempty" csv:",omitempty" nvp:"omitempty"`
-	Vendor1		string	`json:"vendor1,omitempty" xml:",omitempty" csv:",omitempty" nvp:"omitempty"`
-	Vendor2		string	`json:"vendor2,omitempty" xml:",omitempty" csv:",omitempty" nvp:"omitempty"`
-	Vendor3		string	`json:"vendor3,omitempty" xml:",omitempty" csv:",omitempty" nvp:"omitempty"`
-	Vendor4		string	`json:"vendor4,omitempty" xml:",omitempty" csv:",omitempty" nvp:"omitempty"`
-	Vendor5		string	`json:"vendor5,omitempty" xml:",omitempty" csv:",omitempty" nvp:"omitempty"`
-	Vendor6		string	`json:"vendor6,omitempty" xml:",omitempty" csv:",omitempty" nvp:"omitempty"`
-	Vendor7		string	`json:"vendor7,omitempty" xml:",omitempty" csv:",omitempty" nvp:"omitempty"`
-	Vendor8		string	`json:"vendor8,omitempty" xml:",omitempty" csv:",omitempty" nvp:"omitempty"`
-	Vendor9		string	`json:"vendor9,omitempty" xml:",omitempty" csv:",omitempty" nvp:"omitempty"`
+	Vendor		map[string]string `json:",omitempty" xml:",omitempty" csv:"-" nvp:"-" cmp:"-"`
 
-	Changes		[][]string `json:"audit" csv:"-" nvp:"-" compare"-"`
+	Changes		[][]string `csv:"-" nvp:"-" cmp:"-"`
 }
 
 // NewGeneric instantiates a Generic wrapper for an existing gousb Device.
 func NewGeneric(gd *gousb.Device) (*Generic, error) {
 
+	vm := make(map[string]string)
+
+	if gd == nil {
+		return &Generic{Device: &gousb.Device{}, Vendor: vm}, nil
+	}
+
 	var err error
 
-	this := &Generic{Device: gd}
+	this := &Generic{Device: gd, Vendor: vm}
 	errs := this.Init()
 
 	if len(errs) > 0 {
@@ -161,24 +162,24 @@ func (this *Generic) Refresh() (errs map[string]bool) {
 	return errs
 }
 
-// Convenience method to retrieve device serial number.
+// ID is a convenience method to retrieve device serial number.
 func (this *Generic) ID() (string) {
 	return this.SerialNum
 }
 
-// Convenience method to help identify object type to other apps.
+// Type is a convenience method to help identify object type to other apps.
 func (this *Generic) Type() (string) {
 	return reflect.TypeOf(this).String()
 }
 
 // Save saves the object to a JSON file.
 func (this *Generic) Save(fn string) (error) {
-	return gocmdb.SaveObject(*this, fn)
+	return gocmdb.Save(*this, fn)
 }
 
 // Restore restores the object from a JSON file.
 func (this *Generic) Restore(fn string) (error) {
-	return gocmdb.RestoreObject(fn, this)
+	return gocmdb.Restore(fn, this)
 }
 
 // Matches returns true if the objects and their properties are identical.
@@ -192,7 +193,7 @@ func (this *Generic) Compare(fn string) (ss [][]string, err error) {
 	if err = di.Restore(fn); err != nil {
 		return ss, err
 	}
-	return gocmdb.CompareObjects(*this, *di)
+	return gocmdb.Compare(*this, *di)
 }
 
 // Audit calls Compare and places the results in the Changes field.
@@ -213,27 +214,37 @@ func (this *Generic) Filename() (string) {
 	return fmt.Sprintf("%s-%s-%s-%s", this.BusNumber, this.BusAddress, this.VendorID, this.ProductID)
 }
 
-// Reports the hostname and serial number in CSV format.
-func (this *Generic) Bare() ([]byte) {
+// Legacy reports the hostname and serial number in CSV format.
+func (this *Generic) Legacy() ([]byte) {
 	return []byte(this.HostName + "," + this.SerialNum)
 }
 
-// Reports all unfiltered fields in JSON format.
+// JSON reports all unfiltered fields in JSON format.
 func (this *Generic) JSON() ([]byte, error) {
 	return json.Marshal(*this)
 }
 
-// Reports all unfiltered fields in XML format.
+// XML reports all unfiltered fields in XML format.
 func (this *Generic) XML() ([]byte, error) {
 	return xml.Marshal(*this)
 }
 
-// Reports all unfiltered fields in CSV format.
+// CSV reports all unfiltered fields in CSV format.
 func (this *Generic) CSV() ([]byte, error) {
-	return gocmdb.ObjectToCSV(*this)
+	return gocmdb.ToCSV(*this)
 }
 
-// Reports all unfiltered fields as name-value pairs.
+// NVP reports all unfiltered fields as name-value pairs.
 func (this *Generic) NVP() ([]byte, error) {
-	return gocmdb.ObjectToNVP(*this)
+	return gocmdb.ToNVP(*this)
+}
+
+// PrettyJSON reports all unfiltered fields in formatted JSON format.
+func (this *Generic) PrettyJSON() ([]byte, error) {
+	return json.MarshalIndent(*this, MarshalPrefix, MarshalIndent)
+}
+
+// PrettyXML reports all unfiltered fields in formatted XML format.
+func (this *Generic) PrettyXML() ([]byte, error) {
+	return xml.MarshalIndent(*this, MarshalPrefix, MarshalIndent)
 }

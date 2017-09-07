@@ -22,6 +22,8 @@ type Reportable interface {
 	XML() ([]byte, error)
 	CSV() ([]byte, error)
 	NVP() ([]byte, error)
+	PrettyJSON() ([]byte, error)
+	PrettyXML() ([]byte, error)
 	Filename() (string)
 }
 
@@ -72,6 +74,8 @@ type GenericUSB interface {
 	XML() ([]byte, error)
 	CSV() ([]byte, error)
 	NVP() ([]byte, error)
+	PrettyJSON() ([]byte, error)
+	PrettyXML() ([]byte, error)
 	Filename() (string)
 }
 
@@ -92,6 +96,8 @@ type MagtekUSB interface {
 	XML() ([]byte, error)
 	CSV() ([]byte, error)
 	NVP() ([]byte, error)
+	PrettyJSON() ([]byte, error)
+	PrettyXML() ([]byte, error)
 	Filename() (string)
 
 	GetDeviceSN(string) (error)

@@ -12,14 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package api
+package usbci
 
 import (
 	"errors"
 	"fmt"
 	"math"
 	"reflect"
-	"strconv"
 	"time"
 
 	"github.com/google/gousb"
@@ -62,23 +61,21 @@ var (
 
 // Magtek decorates a gousb Device with Generic and Magtek Properties and API.
 type Magtek struct {
-
 	*Generic
-
-	BufferSize int		`json:"bufer_size"`
-	SoftwareID string	`json:"software_id"`
-	ProductVer string	`JSON:"product_ver"`
-	DeviceSN string		`json:"device_sn" csv:"-" nvp:"-"`
-	FactorySN string	`json:"factory_sn" csv:"-" nvp:"-"`
-	DescriptorSN string	`json:"descriptor_sn" csv:"-" nvp:"-"`
 }
 
 // NewMagtek instantiates a Magtek wrapper for an existing gousb Device.
 func NewMagtek(gd *gousb.Device) (*Magtek, error) {
 
+	vm := make(map[string]string)
+
+	if gd == nil {
+		return &Magtek{&Generic{Device: &gousb.Device{}, Vendor: vm}}, nil
+	}
+
 	var err error
 
-	this := &Magtek{Generic: &Generic{Device: gd}}
+	this := &Magtek{&Generic{Device: gd, Vendor: vm}}
 	errs := this.Init()
 
 	if errs["BufferSize"] {this = nil}
@@ -114,23 +111,19 @@ func (this *Magtek) Init() (errs map[string]bool) {
 	if this.ProductVer, err = this.GetProductVer(); err != nil {
 		errs["ProductVer"] = true
 	}
-	if this.DeviceSN, err = this.GetDeviceSN(); err != nil {
+
+	if this.Vendor["DeviceSN"], err = this.GetDeviceSN(); err != nil {
 		errs["DeviceSN"] = true
 	}
-	if this.FactorySN, err = this.GetFactorySN(); err != nil {
+	if this.Vendor["FactorySN"], err = this.GetFactorySN(); err != nil {
 		errs["FactorySN"] = true
 	}
-	if this.DescriptorSN, err = this.SerialNumber(); err != nil {
+	if this.Vendor["DescriptorSN"], err = this.SerialNumber(); err != nil {
 		errs["DescriptorSN"] = true
 	}
 
-	this.SerialNum = this.DeviceSN
+	this.SerialNum = this.Vendor["DeviceSN"]
 	this.ObjectType = this.Type()
-
-	this.Vendor0 = "BufferSize:" + strconv.Itoa(this.BufferSize)
-	this.Vendor1 = "DeviceSN:" + this.DeviceSN
-	this.Vendor2 = "FactorySN:" + this.FactorySN
-	this.Vendor3 = "DescriptorSN:" + this.DescriptorSN
 
 	return errs
 }
@@ -142,27 +135,22 @@ func (this *Magtek) Refresh() (errs map[string]bool) {
 
 	var err error
 
-	if this.DeviceSN, err = this.GetDeviceSN(); err != nil {
+	if this.Vendor["DeviceSN"], err = this.GetDeviceSN(); err != nil {
 		errs["DeviceSN"] = true
 	}
-	if this.FactorySN, err = this.GetFactorySN(); err != nil {
+	if this.Vendor["FactorySN"], err = this.GetFactorySN(); err != nil {
 		errs["FactorySN"] = true
 	}
-	if this.DescriptorSN, err = this.SerialNumber(); err != nil {
+	if this.Vendor["DescriptorSN"], err = this.SerialNumber(); err != nil {
 		errs["DescriptorSN"] = true
 	}
 
-	this.SerialNum = this.DeviceSN
+	this.SerialNum = this.Vendor["DeviceSN"]
 
 	return errs
 }
 
-// Convenience method to retrieve device serial number.
-func (this *Magtek) ID() (string) {
-	return this.SerialNum
-}
-
-// Convenience method to help identify object type to other apps.
+// Type is a convenience method to help identify object type to other apps.
 func (this *Magtek) Type() (string) {
 	return reflect.TypeOf(this).String()
 }

@@ -17,11 +17,11 @@ package gocmdb
 type Reportable interface {
 	ID() (string)
 	Type() (string)
-	Bare() ([]byte)
 	JSON() ([]byte, error)
 	XML() ([]byte, error)
 	CSV() ([]byte, error)
 	NVP() ([]byte, error)
+	Legacy() ([]byte)
 	PrettyJSON() ([]byte, error)
 	PrettyXML() ([]byte, error)
 	Filename() (string)
@@ -35,6 +35,7 @@ type Auditable interface {
 	Matches(interface{})
 	Compare(string) ([][]string, error)
 	Audit(string) (error)
+	JSON() ([]byte, error)
 }
 
 type Registerable interface {
@@ -69,11 +70,11 @@ type GenericUSB interface {
 	Refresh() (error)
 	Reset() (error)
 
-	Bare() ([]byte)
 	JSON() ([]byte, error)
 	XML() ([]byte, error)
 	CSV() ([]byte, error)
 	NVP() ([]byte, error)
+	Legacy() ([]byte)
 	PrettyJSON() ([]byte, error)
 	PrettyXML() ([]byte, error)
 	Filename() (string)
@@ -91,11 +92,11 @@ type MagtekUSB interface {
 	Refresh() (error)
 	Reset() (error)
 
-	Bare() ([]byte)
 	JSON() ([]byte, error)
 	XML() ([]byte, error)
 	CSV() ([]byte, error)
 	NVP() ([]byte, error)
+	Legacy() ([]byte)
 	PrettyJSON() ([]byte, error)
 	PrettyXML() ([]byte, error)
 	Filename() (string)
@@ -106,4 +107,3 @@ type MagtekUSB interface {
 	SetFactorySN(string) (error)
 	CopyFactorySN(int) (error)
 }
-

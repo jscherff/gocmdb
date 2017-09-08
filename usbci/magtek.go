@@ -111,18 +111,17 @@ func (this *Magtek) Init() (errs map[string]bool) {
 	if this.ProductVer, err = this.GetProductVer(); err != nil {
 		errs["ProductVer"] = true
 	}
-
-	if this.Vendor["DeviceSN"], err = this.GetDeviceSN(); err != nil {
+	if this.DeviceSN, err = this.GetDeviceSN(); err != nil {
 		errs["DeviceSN"] = true
 	}
-	if this.Vendor["FactorySN"], err = this.GetFactorySN(); err != nil {
+	if this.FactorySN, err = this.GetFactorySN(); err != nil {
 		errs["FactorySN"] = true
 	}
-	if this.Vendor["DescriptorSN"], err = this.SerialNumber(); err != nil {
+	if this.DescriptorSN, err = this.SerialNumber(); err != nil {
 		errs["DescriptorSN"] = true
 	}
 
-	this.SerialNum = this.Vendor["DeviceSN"]
+	this.SerialNum = this.DeviceSN
 	this.ObjectType = this.Type()
 
 	return errs
@@ -135,17 +134,17 @@ func (this *Magtek) Refresh() (errs map[string]bool) {
 
 	var err error
 
-	if this.Vendor["DeviceSN"], err = this.GetDeviceSN(); err != nil {
+	if this.DeviceSN, err = this.GetDeviceSN(); err != nil {
 		errs["DeviceSN"] = true
 	}
-	if this.Vendor["FactorySN"], err = this.GetFactorySN(); err != nil {
+	if this.FactorySN, err = this.GetFactorySN(); err != nil {
 		errs["FactorySN"] = true
 	}
-	if this.Vendor["DescriptorSN"], err = this.SerialNumber(); err != nil {
+	if this.DescriptorSN, err = this.SerialNumber(); err != nil {
 		errs["DescriptorSN"] = true
 	}
 
-	this.SerialNum = this.Vendor["DeviceSN"]
+	this.SerialNum = this.DeviceSN
 
 	return errs
 }

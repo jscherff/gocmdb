@@ -30,11 +30,15 @@ type Reportable interface {
 type Auditable interface {
 	ID() (string)
 	Type() (string)
-	Save(string)
-	Restore(string)
-	Matches(interface{})
-	Compare(string) ([][]string, error)
-	Audit(string) (error)
+	Save(string) (error)
+	RestoreFile(string) (error)
+	RestoreJSON([]byte) (error)
+	CompareFile(string) ([][]string, error)
+	CompareJSON([]byte) ([][]string, error)
+	AuditFile(string) (error)
+	AuditJSON([]byte) (error)
+	AddChange(string, string, string)
+	Matches(interface{}) (bool)
 	JSON() ([]byte, error)
 }
 
@@ -45,12 +49,15 @@ type Registerable interface {
 }
 
 type Configurable interface {
-	GetDeviceSN(string) (error)
+	ID() (string)
+	Type() (string)
+	JSON() ([]byte, error)
+	GetDeviceSN() (string, error)
 	SetDeviceSN(string) (error)
 	EraseDeviceSN() (error)
 	SetFactorySN(string) (error)
 	CopyFactorySN(int) (error)
-	Refresh() (error)
+	Refresh() (map[string]bool)
 	Reset() (error)
 }
 
@@ -61,13 +68,17 @@ type Resettable interface {
 type GenericUSB interface {
 	ID() (string)
 	Type() (string)
-	Save(fn string)
-	Restore(string)
-	Matches(interface{})
-	Compare(string) ([][]string, error)
-	Audit(string) (error)
+	Save(fn string) (error)
+	RestoreFile(string) (error)
+	RestoreJSON([]byte) (error)
+	CompareFile(string) ([][]string, error)
+	CompareJSON([]byte) ([][]string, error)
+	AuditFile(string) (error)
+	AuditJSON([]byte) (error)
+	AddChange(string, string, string)
+	Matches(interface{}) (bool)
 
-	Refresh() (error)
+	Refresh() (map[string]bool)
 	Reset() (error)
 
 	JSON() ([]byte, error)
@@ -83,13 +94,17 @@ type GenericUSB interface {
 type MagtekUSB interface {
 	ID() (string)
 	Type() (string)
-	Save(fn string)
-	Restore(string)
-	Matches(interface{})
-	Compare(string) ([][]string, error)
-	Audit(string) (error)
+	Save(fn string) (error)
+	RestoreFile(string) (error)
+	RestoreJSON([]byte) (error)
+	CompareFile(string) ([][]string, error)
+	CompareJSON([]byte) ([][]string, error)
+	AuditFile(string) (error)
+	AuditJSON([]byte) (error)
+	AddChange(string, string, string)
+	Matches(interface{}) (bool)
 
-	Refresh() (error)
+	Refresh() (map[string]bool)
 	Reset() (error)
 
 	JSON() ([]byte, error)
@@ -101,7 +116,7 @@ type MagtekUSB interface {
 	PrettyXML() ([]byte, error)
 	Filename() (string)
 
-	GetDeviceSN(string) (error)
+	GetDeviceSN() (string, error)
 	SetDeviceSN(string) (error)
 	EraseDeviceSN() (error)
 	SetFactorySN(string) (error)

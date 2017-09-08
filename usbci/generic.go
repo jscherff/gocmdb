@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"os"
 	"reflect"
-	"strconv"
 
 	"github.com/google/gousb"
 	"github.com/jscherff/gocmdb"
@@ -52,6 +51,10 @@ const (
 	BufferSizeDeviceDescriptor int = 18
 	BufferSizeConfigDescriptor int = 9
 
+	FieldNameIx int = 0
+	OldValueIx int = 1
+	NewValueIx int = 2
+
 	MarshalPrefix string = ""
 	MarshalIndent string = "\t"
 )
@@ -71,16 +74,21 @@ type Generic struct {
 	ProductVer	string
 	BufferSize	int
 
-	BusNumber	string	`json:"-" xml:"-" csv:"-" nvp:"-" cmp:"-"`
-	BusAddress	string	`json:"-" xml:"-" csv:"-" nvp:"-" cmp:"-"`
+	BusNumber	int	`json:"-" xml:"-" csv:"-" nvp:"-" cmp:"-"`
+	BusAddress	int	`json:"-" xml:"-" csv:"-" nvp:"-" cmp:"-"`
+	PortNumber	int	`json:"-" xml:"-" csv:"-" nvp:"-" cmp:"-"`
 	USBSpec		string	`csv:"-" nvp:"-"`
 	USBClass	string	`csv:"-" nvp:"-"`
 	USBSubclass	string	`csv:"-" nvp:"-"`
 	USBProtocol	string	`csv:"-" nvp:"-"`
 	DeviceSpeed	string	`csv:"-" nvp:"-"`
 	DeviceVer	string	`csv:"-" nvp:"-"`
-	MaxPktSize	string	`csv:"-" nvp:"-"`
+	MaxPktSize	int	`csv:"-" nvp:"-"`
 	ObjectType	string	`csv:"-" nvp:"-"`
+
+	DeviceSN	string	`csv:"-" nvp:"-"`
+	FactorySN	string	`csv:"-" nvp:"-"`
+	DescriptorSN	string	`csv:"-" nvp:"-"`
 
 	Vendor		map[string]string `json:",omitempty" xml:",omitempty" csv:"-" nvp:"-" cmp:"-"`
 
@@ -136,15 +144,16 @@ func (this *Generic) Init() (errs map[string]bool) {
 
 	this.VendorID = this.Desc.Vendor.String()
 	this.ProductID = this.Desc.Product.String()
-	this.BusNumber = fmt.Sprintf("%03d", this.Desc.Bus)
-	this.BusAddress = fmt.Sprintf("%03d", this.Desc.Address)
+	this.BusNumber = this.Desc.Bus
+	this.BusAddress = this.Desc.Address
+	this.PortNumber = this.Desc.Port
 	this.USBSpec = this.Desc.Spec.String()
 	this.USBClass = this.Desc.Class.String()
 	this.USBSubclass = this.Desc.SubClass.String()
 	this.USBProtocol = this.Desc.Protocol.String()
 	this.DeviceSpeed = this.Desc.Speed.String()
 	this.DeviceVer = this.Desc.Device.String()
-	this.MaxPktSize = strconv.Itoa(this.Desc.MaxControlPacketSize)
+	this.MaxPktSize = this.Desc.MaxControlPacketSize
 	this.ObjectType = this.Type()
 
 	return errs
@@ -177,29 +186,68 @@ func (this *Generic) Save(fn string) (error) {
 	return gocmdb.Save(*this, fn)
 }
 
-// Restore restores the object from a JSON file.
-func (this *Generic) Restore(fn string) (error) {
+// RestoreFile restores the object from a JSON file.
+func (this *Generic) RestoreFile(fn string) (error) {
 	return gocmdb.Restore(fn, this)
+}
+
+// RestoreJSON restores the object from a JSON file.
+func (this *Generic) RestoreJSON(j []byte) (error) {
+	return json.Unmarshal(j, &this)
+}
+
+// CompareFile compares fields and properties and returns an array of differences.
+func (this *Generic) CompareFile(fn string) (ss [][]string, err error) {
+
+	gusb, err := NewGeneric(nil)
+
+	if err != nil {
+		return ss, err
+	}
+
+	if err = gusb.RestoreFile(fn); err != nil {
+		return ss, err
+	}
+
+	return gocmdb.Compare(*this, *gusb)
+}
+
+// CompareJSON compares fields and properties and returns an array of differences.
+func (this *Generic) CompareJSON(b []byte) (ss [][]string, err error) {
+
+	gusb, err := NewGeneric(nil)
+
+	if err != nil {
+		return ss, err
+	}
+
+	if err = gusb.RestoreJSON(b); err != nil {
+		return ss, err
+	}
+
+	return gocmdb.Compare(*this, *gusb)
+}
+
+// AuditFile calls CompareFile and places the results in the Changes field.
+func (this *Generic) AuditFile(fn string) (err error) {
+	this.Changes, err = this.CompareFile(fn)
+	return err
+}
+
+// AuditJSON calls CompareJSON and places the results in the Changes field.
+func (this *Generic) AuditJSON(j []byte) (err error) {
+	this.Changes, err = this.CompareJSON(j)
+	return err
+}
+
+// AddChange appends manual changes to the devices Changes slice.
+func (this *Generic) AddChange(f, o, n string) {
+	this.Changes = append(this.Changes, []string{f, o, n})
 }
 
 // Matches returns true if the objects and their properties are identical.
 func (this *Generic) Matches(i interface{}) (bool) {
 	return reflect.DeepEqual(this, i)
-}
-
-// Compare compares fields and properties and returns an array of differences.
-func (this *Generic) Compare(fn string) (ss [][]string, err error) {
-	di := new(Generic)
-	if err = di.Restore(fn); err != nil {
-		return ss, err
-	}
-	return gocmdb.Compare(*this, *di)
-}
-
-// Audit calls Compare and places the results in the Changes field.
-func (this *Generic) Audit(fn string) (err error) {
-	this.Changes, err = this.Compare(fn)
-	return err
 }
 
 // SetSerialNum sets the serial number property only. Does not change the
@@ -211,7 +259,13 @@ func (this *Generic) SetSerial(val string) {
 // Filename constructs a convenient filename from the bus number, bus address,
 // vendor ID, and product ID. Filenames guaranteed unique on a single computer.
 func (this *Generic) Filename() (string) {
-	return fmt.Sprintf("%s-%s-%s-%s", this.BusNumber, this.BusAddress, this.VendorID, this.ProductID)
+	return fmt.Sprintf("%03d-%03d-%03d-%s-%s",
+		this.BusNumber,
+		this.BusAddress,
+		this.PortNumber,
+		this.VendorID,
+		this.ProductID,
+	)
 }
 
 // Legacy reports the hostname and serial number in CSV format.

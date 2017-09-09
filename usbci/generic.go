@@ -74,9 +74,9 @@ type Generic struct {
 	ProductVer	string
 	BufferSize	int
 
-	BusNumber	int	`json:"-" xml:"-" csv:"-" nvp:"-" cmp:"-"`
-	BusAddress	int	`json:"-" xml:"-" csv:"-" nvp:"-" cmp:"-"`
-	PortNumber	int	`json:"-" xml:"-" csv:"-" nvp:"-" cmp:"-"`
+	BusNumber	int	`csv:"-" nvp:"-" cmp:"-"`
+	BusAddress	int	`csv:"-" nvp:"-" cmp:"-"`
+	PortNumber	int	`csv:"-" nvp:"-" cmp:"-"`
 	USBSpec		string	`csv:"-" nvp:"-"`
 	USBClass	string	`csv:"-" nvp:"-"`
 	USBSubclass	string	`csv:"-" nvp:"-"`

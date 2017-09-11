@@ -171,9 +171,19 @@ func (this *Generic) Refresh() (errs map[string]bool) {
 	return errs
 }
 
-// ID is a convenience method to retrieve device serial number.
+// ID is a convenience method to retrieve the device serial number.
 func (this *Generic) ID() (string) {
 	return this.SerialNum
+}
+
+// VID is a convenience method to retrieve the device vendor ID.
+func (this *Generic) VID() (string) {
+	return this.VendorID
+}
+
+// PID is a convenience method to retrieve the device product ID.
+func (this *Generic) PID() (string) {
+	return this.ProductID
 }
 
 // Type is a convenience method to help identify object type to other apps.

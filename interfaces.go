@@ -29,6 +29,8 @@ type Reportable interface {
 
 type Auditable interface {
 	ID() (string)
+	VID() (string)
+	PID() (string)
 	Type() (string)
 	Save(string) (error)
 	RestoreFile(string) (error)
@@ -44,6 +46,8 @@ type Auditable interface {
 
 type Registerable interface {
 	ID() (string)
+	VID() (string)
+	PID() (string)
 	Type() (string)
 	JSON() ([]byte, error)
 }
@@ -67,6 +71,8 @@ type Resettable interface {
 
 type GenericUSB interface {
 	ID() (string)
+	VID() (string)
+	PID() (string)
 	Type() (string)
 	Save(fn string) (error)
 	RestoreFile(string) (error)
@@ -93,6 +99,8 @@ type GenericUSB interface {
 
 type MagtekUSB interface {
 	ID() (string)
+	VID() (string)
+	PID() (string)
 	Type() (string)
 	Save(fn string) (error)
 	RestoreFile(string) (error)

@@ -72,18 +72,18 @@ type Generic struct {
 	SerialNum	string
 	SoftwareID	string
 	ProductVer	string
-	BufferSize	int
 
 	BusNumber	int	`csv:"-" nvp:"-" cmp:"-"`
 	BusAddress	int	`csv:"-" nvp:"-" cmp:"-"`
 	PortNumber	int	`csv:"-" nvp:"-" cmp:"-"`
+	BufferSize	int	`csv:"-" nvp:"-"`
+	MaxPktSize	int	`csv:"-" nvp:"-"`
 	USBSpec		string	`csv:"-" nvp:"-"`
 	USBClass	string	`csv:"-" nvp:"-"`
 	USBSubclass	string	`csv:"-" nvp:"-"`
 	USBProtocol	string	`csv:"-" nvp:"-"`
 	DeviceSpeed	string	`csv:"-" nvp:"-"`
 	DeviceVer	string	`csv:"-" nvp:"-"`
-	MaxPktSize	int	`csv:"-" nvp:"-"`
 	ObjectType	string	`csv:"-" nvp:"-"`
 
 	DeviceSN	string	`csv:"-" nvp:"-"`

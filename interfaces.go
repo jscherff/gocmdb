@@ -46,8 +46,6 @@ type Auditable interface {
 
 type Registerable interface {
 	ID() (string)
-	VID() (string)
-	PID() (string)
 	Type() (string)
 	JSON() ([]byte, error)
 }

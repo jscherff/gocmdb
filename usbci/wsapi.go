@@ -20,8 +20,7 @@ type WSAPI struct {
 }
 
 func NewWSAPI() (*WSAPI) {
-	vm := make(map[string]string)
-	return &WSAPI{&Generic{Device: nil, Vendor: vm}}
+	return &WSAPI{NewGeneric(nil)}
 }
 
 func (this *WSAPI) GetHostName() (string) { return this.HostName }

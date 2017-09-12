@@ -12,70 +12,75 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package api
+package cmapi
 
-// usbci is a collection of getters for use by the gocmdbd webserver
-type usbci struct {
-	HostName     string		`json:"host_name"     csv:"host_name"`
-	VendorID     string		`json:"vendor_id"     csv:"vendor_id"`
-	ProductID    string		`json:"product_id"    csv:"product_id"`
-	VendorName   string		`json:"vendor_name"   csv:"vendor_name"`
-	ProductName  string		`json:"product_name"  csv:"product_name"`
-	SerialNum    string		`json:"serial_num"    csv:"serial_num"`
-	SoftwareID   string		`json:"software_id"   csv:"software_id"`
-	ProductVer   string		`json:"product_ver"   csv:"product_ver"`
+const (
+	FieldNameIx int = 0
+	OldValueIx int = 1
+	NewValueIx int = 2
+)
 
-	BusNumber    int		`json:"bus_number"    csv:"-" nvp:"-" cmp:"-"`
-	BusAddress   int		`json:"bus_address"   csv:"-" nvp:"-" cmp:"-"`
-	PortNumber   int		`json:"port_number"   csv:"-" nvp:"-" cmp:"-"`
-	BufferSize   int		`json:"buffer_size"   csv:"-" nvp:"-"`
-	MaxPktSize   int		`json:"max_pkt_size"  csv:"-" nvp:"-"`
-	USBSpec	     string		`json:"usb_spec"      csv:"-" nvp:"-"`
-	USBClass     string		`json:"usb_class"     csv:"-" nvp:"-"`
-	USBSubclass  string		`json:"usb_subclass"  csv:"-" nvp:"-"`
-	USBProtocol  string		`json:"usb_protocol"  csv:"-" nvp:"-"`
-	DeviceSpeed  string		`json:"device_speed"  csv:"-" nvp:"-"`
-	DeviceVer    string		`json:"device_ver"    csv:"-" nvp:"-"`
-	ObjectType   string		`json:"object_type"   csv:"-" nvp:"-"`
+// UsbCi is a collection of getters for use by the gocmdbd webserver
+type UsbCi struct {
+	HostName     string		`json:"host_name"`
+	VendorID     string		`json:"vendor_id"`
+	ProductID    string		`json:"product_id"`
+	VendorName   string		`json:"vendor_name"`
+	ProductName  string		`json:"product_name"`
+	SerialNum    string		`json:"serial_num"`
+	SoftwareID   string		`json:"software_id"`
+	ProductVer   string		`json:"product_ver"`
 
-	DeviceSN     string		`json:"device_sn"     csv:"-" nvp:"-"`
-	FactorySN    string		`json:"factory_sn"    csv:"-" nvp:"-"`
-	DescriptorSN string		`json:"descriptor_sn" csv:"-" nvp:"-"`
+	BusNumber    int		`json:"bus_number"`
+	BusAddress   int		`json:"bus_address"`
+	PortNumber   int		`json:"port_number"`
+	BufferSize   int		`json:"buffer_size"`
+	MaxPktSize   int		`json:"max_pkt_size"`
+	USBSpec	     string		`json:"usb_spec"`
+	USBClass     string		`json:"usb_class"`
+	USBSubclass  string		`json:"usb_subclass"`
+	USBProtocol  string		`json:"usb_protocol"`
+	DeviceSpeed  string		`json:"device_speed"`
+	DeviceVer    string		`json:"device_ver"`
+	ObjectType   string		`json:"object_type"`
 
-	Changes	     [][]string		`json:"changes"       csv:"-" nvp:"-" cmp:"-"`
-	Vendor       map[string]string	`json:"vendor"        csv:"-" nvp:"-" cmp:"-"`
+	DeviceSN     string		`json:"device_sn"`
+	FactorySN    string		`json:"factory_sn"`
+	DescriptorSN string		`json:"descriptor_sn"`
 
+	Changes	     [][]string		`json:"changes"`
+	Vendor       map[string]string	`json:"vendor"`
 }
 
-func Newusbci() (*usbci) {
-	return &usbci{Vendor: make(map[string]string)}
+func NewUsbCi() (*UsbCi) {
+	return &UsbCi{Vendor: make(map[string]string)}
 }
 
-func (this *usbci) ID() (string) { return this.SerialNum }
-func (this *usbci) VID() (string) { return this.VendorID }
-func (this *usbci) PID() (string) { return this.ProductID }
-func (this *usbci) GetHostName() (string) { return this.HostName }
-func (this *usbci) GetVendorID() (string) { return this.VendorID }
-func (this *usbci) GetProductID() (string) { return this.ProductID }
-func (this *usbci) GetVendorName() (string) { return this.VendorName }
-func (this *usbci) GetProductName() (string)	{ return this.ProductName }
-func (this *usbci) GetSerialNum() (string) { return this.SerialNum }
-func (this *usbci) GetSoftwareID() (string) { return this.SoftwareID }
-func (this *usbci) GetProductVer() (string) { return this.ProductVer }
-func (this *usbci) GetBufferSize() (int) { return this.BufferSize }
-func (this *usbci) GetBusNumber() (int) { return this.BusNumber }
-func (this *usbci) GetBusAddress() (int) { return this.BusAddress }
-func (this *usbci) GetPortNumber() (int) { return this.PortNumber }
-func (this *usbci) GetUSBSpec() (string) { return this.USBSpec }
-func (this *usbci) GetUSBClass() (string) { return this.USBClass }
-func (this *usbci) GetUSBSubclass() (string) { return this.USBSubclass }
-func (this *usbci) GetUSBProtocol() (string) { return this.USBProtocol }
-func (this *usbci) GetDeviceSpeed() (string) { return this.DeviceSpeed }
-func (this *usbci) GetDeviceVer() (string) { return this.DeviceVer }
-func (this *usbci) GetMaxPktSize() (int) { return this.MaxPktSize }
-func (this *usbci) GetObjectType() (string) { return this.ObjectType }
-func (this *usbci) GetDeviceSN() (string) { return this.DeviceSN }
-func (this *usbci) GetFactorySN() (string) { return this.FactorySN }
-func (this *usbci) GetDescriptorSN() (string) { return this.DescriptorSN }
-func (this *usbci) GetVendor() (map[string]string) { return this.Vendor }
-func (this *usbci) GetChanges() ([][]string) { return this.Changes }
+func (this *UsbCi) ID() (string) { return this.SerialNum }
+func (this *UsbCi) VID() (string) { return this.VendorID }
+func (this *UsbCi) PID() (string) { return this.ProductID }
+func (this *UsbCi) GetHostName() (string) { return this.HostName }
+func (this *UsbCi) GetVendorID() (string) { return this.VendorID }
+func (this *UsbCi) GetProductID() (string) { return this.ProductID }
+func (this *UsbCi) GetVendorName() (string) { return this.VendorName }
+func (this *UsbCi) GetProductName() (string)	{ return this.ProductName }
+func (this *UsbCi) GetSerialNum() (string) { return this.SerialNum }
+func (this *UsbCi) GetSoftwareID() (string) { return this.SoftwareID }
+func (this *UsbCi) GetProductVer() (string) { return this.ProductVer }
+func (this *UsbCi) GetBufferSize() (int) { return this.BufferSize }
+func (this *UsbCi) GetBusNumber() (int) { return this.BusNumber }
+func (this *UsbCi) GetBusAddress() (int) { return this.BusAddress }
+func (this *UsbCi) GetPortNumber() (int) { return this.PortNumber }
+func (this *UsbCi) GetUSBSpec() (string) { return this.USBSpec }
+func (this *UsbCi) GetUSBClass() (string) { return this.USBClass }
+func (this *UsbCi) GetUSBSubclass() (string) { return this.USBSubclass }
+func (this *UsbCi) GetUSBProtocol() (string) { return this.USBProtocol }
+func (this *UsbCi) GetDeviceSpeed() (string) { return this.DeviceSpeed }
+func (this *UsbCi) GetDeviceVer() (string) { return this.DeviceVer }
+func (this *UsbCi) GetMaxPktSize() (int) { return this.MaxPktSize }
+func (this *UsbCi) GetObjectType() (string) { return this.ObjectType }
+func (this *UsbCi) GetDeviceSN() (string) { return this.DeviceSN }
+func (this *UsbCi) GetFactorySN() (string) { return this.FactorySN }
+func (this *UsbCi) GetDescriptorSN() (string) { return this.DescriptorSN }
+func (this *UsbCi) GetVendor() (map[string]string) { return this.Vendor }
+func (this *UsbCi) GetChanges() ([][]string) { return this.Changes }

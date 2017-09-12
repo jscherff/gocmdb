@@ -14,14 +14,16 @@
 
 package usbci
 
+import "github.com/google/gousb"
+
 // WSAPI is a collection of getters for use by the gocmdbd webserver
 type WSAPI struct {
 	*Generic
 }
 
 func NewWSAPI() (*WSAPI) {
-	g, _ := NewGeneric(nil)
-	return &WSAPI(g)
+	vm := make(map[string]string)
+	return &WSAPI{&Generic{Device: &gousb.Device{}, Vendor: vm}}
 }
 
 func (this *WSAPI) GetHostName() (string) { return this.HostName }

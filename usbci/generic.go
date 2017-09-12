@@ -62,37 +62,37 @@ const (
 // Generic decorates a gousb Device with Generic Properties and API.
 type Generic struct {
 
-	*gousb.Device		`json:"-" xml:"-" csv:"-" nvp:"-" cmp:"-"`
+	*gousb.Device			`json:"-" xml:"-" csv:"-" nvp:"-" cmp:"-"`
 
-	HostName	string
-	VendorID	string
-	ProductID	string
-	VendorName	string
-	ProductName	string
-	SerialNum	string
-	SoftwareID	string
-	ProductVer	string
+	HostName     string		`json:"host_name"     csv:"host_name"`
+	VendorID     string		`json:"vendor_id"     csv:"vendor_id"`
+	ProductID    string		`json:"product_id"    csv:"product_id"`
+	VendorName   string		`json:"vendor_name"   csv:"vendor_name"`
+	ProductName  string		`json:"product_name"  csv:"product_name"`
+	SerialNum    string		`json:"serial_num"    csv:"serial_num"`
+	SoftwareID   string		`json:"software_id"   csv:"software_id"`
+	ProductVer   string		`json:"product_ver"   csv:"product_ver"`
 
-	BusNumber	int	`csv:"-" nvp:"-" cmp:"-"`
-	BusAddress	int	`csv:"-" nvp:"-" cmp:"-"`
-	PortNumber	int	`csv:"-" nvp:"-" cmp:"-"`
-	BufferSize	int	`csv:"-" nvp:"-"`
-	MaxPktSize	int	`csv:"-" nvp:"-"`
-	USBSpec		string	`csv:"-" nvp:"-"`
-	USBClass	string	`csv:"-" nvp:"-"`
-	USBSubclass	string	`csv:"-" nvp:"-"`
-	USBProtocol	string	`csv:"-" nvp:"-"`
-	DeviceSpeed	string	`csv:"-" nvp:"-"`
-	DeviceVer	string	`csv:"-" nvp:"-"`
-	ObjectType	string	`csv:"-" nvp:"-"`
+	BusNumber    int		`json:"bus_number"    csv:"-" nvp:"-" cmp:"-"`
+	BusAddress   int		`json:"bus_address"   csv:"-" nvp:"-" cmp:"-"`
+	PortNumber   int		`json:"port_number"   csv:"-" nvp:"-" cmp:"-"`
+	BufferSize   int		`json:"buffer_size"   csv:"-" nvp:"-"`
+	MaxPktSize   int		`json:"max_pkt_size"  csv:"-" nvp:"-"`
+	USBSpec	     string		`json:"usb_spec"      csv:"-" nvp:"-"`
+	USBClass     string		`json:"usb_class"     csv:"-" nvp:"-"`
+	USBSubclass  string		`json:"usb_subclass"  csv:"-" nvp:"-"`
+	USBProtocol  string		`json:"usb_protocol"  csv:"-" nvp:"-"`
+	DeviceSpeed  string		`json:"device_speed"  csv:"-" nvp:"-"`
+	DeviceVer    string		`json:"device_ver"    csv:"-" nvp:"-"`
+	ObjectType   string		`json:"object_type"   csv:"-" nvp:"-"`
 
-	DeviceSN	string	`csv:"-" nvp:"-"`
-	FactorySN	string	`csv:"-" nvp:"-"`
-	DescriptorSN	string	`csv:"-" nvp:"-"`
+	DeviceSN     string		`json:"device_sn"     csv:"-" nvp:"-"`
+	FactorySN    string		`json:"factory_sn"    csv:"-" nvp:"-"`
+	DescriptorSN string		`json:"descriptor_sn" csv:"-" nvp:"-"`
 
-	Vendor		map[string]string `json:",omitempty" xml:",omitempty" csv:"-" nvp:"-" cmp:"-"`
+	Changes	     [][]string		`json:"changes"       csv:"-" nvp:"-" cmp:"-"`
+	Vendor       map[string]string	`json:"vendor"        csv:"-" nvp:"-" cmp:"-"`
 
-	Changes		[][]string `csv:"-" nvp:"-" cmp:"-"`
 }
 
 // NewGeneric instantiates a Generic wrapper for an existing gousb Device.

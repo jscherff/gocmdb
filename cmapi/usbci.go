@@ -64,7 +64,7 @@ func (this *UsbCi) GetVendorID() (string) { return this.VendorID }
 func (this *UsbCi) GetProductID() (string) { return this.ProductID }
 func (this *UsbCi) GetSerialNum() (string) { return this.SerialNum }
 func (this *UsbCi) GetVendorName() (string) { return this.VendorName }
-func (this *UsbCi) GetProductName() (string)	{ return this.ProductName }
+func (this *UsbCi) GetProductName() (string) { return this.ProductName }
 func (this *UsbCi) GetSoftwareID() (string) { return this.SoftwareID }
 func (this *UsbCi) GetProductVer() (string) { return this.ProductVer }
 func (this *UsbCi) GetBusNumber() (int) { return this.BusNumber }

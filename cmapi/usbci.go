@@ -14,12 +14,6 @@
 
 package cmapi
 
-import (
-	"fmt"
-	"reflect"
-	"strings"
-)
-
 const (
 	FieldNameIx int = 0
 	OldValueIx int = 1

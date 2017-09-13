@@ -23,7 +23,6 @@ type Identifiable interface {
 }
 
 type Reportable interface {
-	Identifiable
 	JSON() ([]byte, error)
 	XML() ([]byte, error)
 	CSV() ([]byte, error)
@@ -35,7 +34,6 @@ type Reportable interface {
 }
 
 type Comparable interface {
-	Identifiable
 	Save(string) (error)
 	RestoreFile(string) (error)
 	RestoreJSON([]byte) (error)
@@ -45,12 +43,6 @@ type Comparable interface {
 	AuditJSON([]byte) (error)
 	AddChange(string, string, string)
 	Matches(interface{}) (bool)
-	JSON() ([]byte, error)
-}
-
-type Registerable interface {
-	Identifiable
-	JSON() ([]byte, error)
 }
 
 type Resettable interface {
@@ -58,13 +50,34 @@ type Resettable interface {
 	Reset() (error)
 }
 
+type Registerable interface {
+	Identifiable
+	Reportable
+}
+
+type Auditable interface {
+	Identifiable
+	Reportable
+	Comparable
+}
+
 type Configurable interface {
 	Identifiable
+	Reportable
+	Comparable
 	Resettable
 	GetDeviceSN() (string, error)
 	SetDeviceSN(string) (error)
 	EraseDeviceSN() (error)
 	SetFactorySN(string) (error)
 	CopyFactorySN(int) (error)
-	JSON() ([]byte, error)
+}
+
+type GenericUSB interface {
+	Auditable
+	Resettable
+}
+
+type MagtekUSB interface {
+	Configurable
 }

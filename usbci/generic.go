@@ -186,6 +186,11 @@ func (this *Generic) PID() (string) {
 	return this.ProductID
 }
 
+// Host is a convenience method to retrieve the device hostname.
+func (this *Generic) Host() (string) {
+	return this.HostName
+}
+
 // Type is a convenience method to help identify object type to other apps.
 func (this *Generic) Type() (string) {
 	return reflect.TypeOf(this).String()

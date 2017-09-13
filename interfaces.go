@@ -14,9 +14,16 @@
 
 package gocmdb
 
-type Reportable interface {
+type Identifiable interface {
 	ID() (string)
+	VID() (string)
+	PID() (string)
+	Host() (string)
 	Type() (string)
+}
+
+type Reportable interface {
+	Identifiable
 	JSON() ([]byte, error)
 	XML() ([]byte, error)
 	CSV() ([]byte, error)
@@ -27,11 +34,8 @@ type Reportable interface {
 	Filename() (string)
 }
 
-type Auditable interface {
-	ID() (string)
-	VID() (string)
-	PID() (string)
-	Type() (string)
+type Comparable interface {
+	Identifiable
 	Save(string) (error)
 	RestoreFile(string) (error)
 	RestoreJSON([]byte) (error)
@@ -45,86 +49,22 @@ type Auditable interface {
 }
 
 type Registerable interface {
-	ID() (string)
-	Type() (string)
+	Identifiable
 	JSON() ([]byte, error)
-}
-
-type Configurable interface {
-	ID() (string)
-	Type() (string)
-	JSON() ([]byte, error)
-	GetDeviceSN() (string, error)
-	SetDeviceSN(string) (error)
-	EraseDeviceSN() (error)
-	SetFactorySN(string) (error)
-	CopyFactorySN(int) (error)
-	Refresh() (map[string]bool)
-	Reset() (error)
 }
 
 type Resettable interface {
+	Refresh() (map[string]bool)
 	Reset() (error)
 }
 
-type GenericUSB interface {
-	ID() (string)
-	VID() (string)
-	PID() (string)
-	Type() (string)
-	Save(fn string) (error)
-	RestoreFile(string) (error)
-	RestoreJSON([]byte) (error)
-	CompareFile(string) ([][]string, error)
-	CompareJSON([]byte) ([][]string, error)
-	AuditFile(string) (error)
-	AuditJSON([]byte) (error)
-	AddChange(string, string, string)
-	Matches(interface{}) (bool)
-
-	Refresh() (map[string]bool)
-	Reset() (error)
-
-	JSON() ([]byte, error)
-	XML() ([]byte, error)
-	CSV() ([]byte, error)
-	NVP() ([]byte, error)
-	Legacy() ([]byte)
-	PrettyJSON() ([]byte, error)
-	PrettyXML() ([]byte, error)
-	Filename() (string)
-}
-
-type MagtekUSB interface {
-	ID() (string)
-	VID() (string)
-	PID() (string)
-	Type() (string)
-	Save(fn string) (error)
-	RestoreFile(string) (error)
-	RestoreJSON([]byte) (error)
-	CompareFile(string) ([][]string, error)
-	CompareJSON([]byte) ([][]string, error)
-	AuditFile(string) (error)
-	AuditJSON([]byte) (error)
-	AddChange(string, string, string)
-	Matches(interface{}) (bool)
-
-	Refresh() (map[string]bool)
-	Reset() (error)
-
-	JSON() ([]byte, error)
-	XML() ([]byte, error)
-	CSV() ([]byte, error)
-	NVP() ([]byte, error)
-	Legacy() ([]byte)
-	PrettyJSON() ([]byte, error)
-	PrettyXML() ([]byte, error)
-	Filename() (string)
-
+type Configurable interface {
+	Identifiable
+	Resettable
 	GetDeviceSN() (string, error)
 	SetDeviceSN(string) (error)
 	EraseDeviceSN() (error)
 	SetFactorySN(string) (error)
 	CopyFactorySN(int) (error)
+	JSON() ([]byte, error)
 }

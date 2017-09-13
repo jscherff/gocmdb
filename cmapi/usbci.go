@@ -59,6 +59,7 @@ func NewUsbCi() (*UsbCi) {
 func (this *UsbCi) ID() (string) { return this.SerialNum }
 func (this *UsbCi) VID() (string) { return this.VendorID }
 func (this *UsbCi) PID() (string) { return this.ProductID }
+func (this *UsbCi) Host() (string) { return this.HostName }
 func (this *UsbCi) GetHostName() (string) { return this.HostName }
 func (this *UsbCi) GetVendorID() (string) { return this.VendorID }
 func (this *UsbCi) GetProductID() (string) { return this.ProductID }

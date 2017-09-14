@@ -15,15 +15,15 @@
 package usbci
 
 import (
-	"encoding/json"
-	"encoding/xml"
-	"errors"
-	"fmt"
-	"os"
-	"reflect"
+	`encoding/json`
+	`encoding/xml`
+	`errors`
+	`fmt`
+	`os`
+	`reflect`
 
-	"github.com/google/gousb"
-	"github.com/jscherff/gocmdb"
+	`github.com/google/gousb`
+	`github.com/jscherff/gocmdb`
 )
 
 const (
@@ -111,13 +111,13 @@ func NewGeneric(gd *gousb.Device) (*Generic, error) {
 
 	if len(errs) > 0 {
 
-		emsg := "initialization failures:"
+		emsg := `initialization failures:`
 
 		for k, _ := range errs {
-			emsg = fmt.Sprintf("%s %s", emsg, k)
+			emsg = fmt.Sprintf(`%s %s`, emsg, k)
 		}
 
-		err = gocmdb.ErrorDecorator(errors.New(emsg))
+		err = errors.New(emsg)
 	}
 
 	return this, err
@@ -130,16 +130,16 @@ func (this *Generic) Init() (errs map[string]bool) {
 	var err error
 
 	if this.HostName, err = os.Hostname(); err != nil {
-		errs["HostName"] = true
+		errs[`HostName`] = true
 	}
 	if this.VendorName, err = this.Manufacturer(); err != nil {
-		errs["VendorName"] = true
+		errs[`VendorName`] = true
 	}
 	if this.ProductName, err = this.Product(); err != nil {
-		errs["ProductName"] = true
+		errs[`ProductName`] = true
 	}
 	if this.SerialNum, err = this.SerialNumber(); err != nil {
-		errs["SerialNum"] = true
+		errs[`SerialNum`] = true
 	}
 
 	this.VendorID = this.Desc.Vendor.String()
@@ -165,7 +165,7 @@ func (this *Generic) Refresh() (errs map[string]bool) {
 	var err error
 
 	if this.SerialNum, err = this.SerialNumber(); err != nil {
-		errs["SerialNum"] = true
+		errs[`SerialNum`] = true
 	}
 
 	return errs
@@ -274,7 +274,7 @@ func (this *Generic) SetSerial(val string) {
 // Filename constructs a convenient filename from the bus number, bus address,
 // vendor ID, and product ID. Filenames guaranteed unique on a single computer.
 func (this *Generic) Filename() (string) {
-	return fmt.Sprintf("%03d-%03d-%03d-%s-%s",
+	return fmt.Sprintf(`%03d-%03d-%03d-%s-%s`,
 		this.BusNumber,
 		this.BusAddress,
 		this.PortNumber,
@@ -285,7 +285,7 @@ func (this *Generic) Filename() (string) {
 
 // Legacy reports the hostname and serial number in CSV format.
 func (this *Generic) Legacy() ([]byte) {
-	return []byte(this.HostName + "," + this.SerialNum)
+	return []byte(this.HostName + `,` + this.SerialNum)
 }
 
 // JSON reports all unfiltered fields in JSON format.

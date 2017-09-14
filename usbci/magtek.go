@@ -15,14 +15,12 @@
 package usbci
 
 import (
-	"errors"
-	"fmt"
-	"math"
-	"reflect"
-	"time"
-
-	"github.com/google/gousb"
-	"github.com/jscherff/gocmdb"
+	`errors`
+	`fmt`
+	`math`
+	`reflect`
+	`time`
+	`github.com/google/gousb`
 )
 
 const (
@@ -78,17 +76,17 @@ func NewMagtek(gd *gousb.Device) (*Magtek, error) {
 	this := &Magtek{&Generic{Device: gd, Vendor: vm}}
 	errs := this.Init()
 
-	if errs["BufferSize"] {this = nil}
+	if errs[`BufferSize`] {this = nil}
 
 	if len(errs) > 0 {
 
-		emsg := "initialization failures:"
+		emsg := `initialization failures:`
 
 		for k, _ := range errs {
-			emsg = fmt.Sprintf("%s %s", emsg, k)
+			emsg = fmt.Sprintf(`%s %s`, emsg, k)
 		}
 
-		err = gocmdb.ErrorDecorator(errors.New(emsg))
+		err = errors.New(emsg)
 	}
 
 	return this, err
@@ -102,23 +100,23 @@ func (this *Magtek) Init() (errs map[string]bool) {
 	var err error
 
 	if this.BufferSize, err = this.GetBufferSize(); err != nil {
-		errs["BufferSize"] = true
+		errs[`BufferSize`] = true
 		return errs
 	}
 	if this.SoftwareID, err = this.GetSoftwareID(); err != nil {
-		errs["SoftwareID"] = true
+		errs[`SoftwareID`] = true
 	}
 	if this.ProductVer, err = this.GetProductVer(); err != nil {
-		errs["ProductVer"] = true
+		errs[`ProductVer`] = true
 	}
 	if this.DeviceSN, err = this.GetDeviceSN(); err != nil {
-		errs["DeviceSN"] = true
+		errs[`DeviceSN`] = true
 	}
 	if this.FactorySN, err = this.GetFactorySN(); err != nil {
-		errs["FactorySN"] = true
+		errs[`FactorySN`] = true
 	}
 	if this.DescriptorSN, err = this.SerialNumber(); err != nil {
-		errs["DescriptorSN"] = true
+		errs[`DescriptorSN`] = true
 	}
 
 	this.SerialNum = this.DeviceSN
@@ -135,13 +133,13 @@ func (this *Magtek) Refresh() (errs map[string]bool) {
 	var err error
 
 	if this.DeviceSN, err = this.GetDeviceSN(); err != nil {
-		errs["DeviceSN"] = true
+		errs[`DeviceSN`] = true
 	}
 	if this.FactorySN, err = this.GetFactorySN(); err != nil {
-		errs["FactorySN"] = true
+		errs[`FactorySN`] = true
 	}
 	if this.DescriptorSN, err = this.SerialNumber(); err != nil {
-		errs["DescriptorSN"] = true
+		errs[`DescriptorSN`] = true
 	}
 
 	this.SerialNum = this.DeviceSN
@@ -162,7 +160,7 @@ func (this *Magtek) GetDeviceSN() (string, error) {
 // FactorySN retrieves the device factory serial number from NVRAM.
 func (this *Magtek) GetFactorySN() (string, error) {
 	val, err := this.getProperty(PropFactorySN)
-	if len(val) <= 1 {val = ""}
+	if len(val) <= 1 {val = ``}
 	return val, err
 }
 
@@ -174,7 +172,7 @@ func (this *Magtek) GetSoftwareID() (string, error) {
 // ProductVer retrieves the product version of the device from NVRAM.
 func (this *Magtek) GetProductVer() (string, error) {
 	val, err := this.getProperty(PropProductVer)
-	if len(val) <= 1 {val = ""}
+	if len(val) <= 1 {val = ``}
 	return val, err
 }
 
@@ -185,7 +183,7 @@ func (this *Magtek) SetDeviceSN(val string) (error) {
 
 // EraseDeviceSN removes the device configurable serial number from NVRAM.
 func (this *Magtek) EraseDeviceSN() (error) {
-	return this.setProperty(PropDeviceSN, "")
+	return this.setProperty(PropDeviceSN, ``)
 }
 
 // SetFactorySN sets the device factory device serial number in NVRAM.
@@ -201,11 +199,11 @@ func (this *Magtek) CopyFactorySN(n int) (error) {
 	val, err := this.GetFactorySN()
 
 	if err != nil {
-		return gocmdb.ErrorDecorator(err)
+		return err
 	}
 
 	if len(val) == 0 {
-		return gocmdb.ErrorDecorator(fmt.Errorf("no factory serial number"))
+		return fmt.Errorf(`no factory serial number`)
 	}
 
 	n = int(math.Min(float64(n), float64(len(val))))
@@ -228,7 +226,7 @@ func (this *Magtek) Reset() (error) {
 		data)
 
 	if err != nil {
-		err = gocmdb.ErrorDecorator(err)
+		err = err
 	}
 
 	data = make([]byte, this.BufferSize)
@@ -241,11 +239,11 @@ func (this *Magtek) Reset() (error) {
 		data)
 
 	if err != nil {
-		return gocmdb.ErrorDecorator(err)
+		return err
 	}
 
 	if data[0] > 0x00 {
-		err = gocmdb.ErrorDecorator(fmt.Errorf("command error: %d", int(data[0])))
+		err = fmt.Errorf(`command error: %d`, int(data[0]))
 	}
 
 	time.Sleep(5 * time.Second)
@@ -290,7 +288,7 @@ func (this *Magtek) GetBufferSize() (size int, err error) {
 	}
 
 	if err != nil {
-		err = gocmdb.ErrorDecorator(fmt.Errorf("unsupported device"))
+		err = fmt.Errorf(`unsupported device`)
 	}
 
 	return size, err
@@ -310,7 +308,7 @@ func (this *Magtek) getProperty(id uint8) (val string, err error) {
 		data)
 
 	if err != nil {
-		return val, gocmdb.ErrorDecorator(err)
+		return val, err
 	}
 
 	data = make([]byte, this.BufferSize)
@@ -323,11 +321,11 @@ func (this *Magtek) getProperty(id uint8) (val string, err error) {
 		data)
 
 	if err != nil {
-		return val, gocmdb.ErrorDecorator(err)
+		return val, err
 	}
 
 	if data[0] > 0x00 {
-		return val, gocmdb.ErrorDecorator(fmt.Errorf("command error: %d", int(data[0])))
+		return val, fmt.Errorf(`command error: %d`, int(data[0]))
 	}
 
 	if data[1] > 0x00 {
@@ -352,7 +350,7 @@ func (this *Magtek) setProperty(id uint8, val string) (err error) {
 		data)
 
 	if err != nil {
-		return gocmdb.ErrorDecorator(err)
+		return err
 	}
 
 	data = make([]byte, this.BufferSize)
@@ -365,11 +363,11 @@ func (this *Magtek) setProperty(id uint8, val string) (err error) {
 		data)
 
 	if err != nil {
-		return gocmdb.ErrorDecorator(err)
+		return err
 	}
 
 	if data[0] > 0x00 {
-		err = gocmdb.ErrorDecorator(fmt.Errorf("command error: %d", int(data[0])))
+		err = fmt.Errorf(`command error: %d`, int(data[0]))
 	}
 
 	if err == nil {

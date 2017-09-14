@@ -15,15 +15,13 @@
 package gocmdb
 
 import (
-	"bytes"
-	"fmt"
-	"encoding/csv"
-	"encoding/json"
-	"os"
-	"path/filepath"
-	"reflect"
-	"runtime"
-	"strings"
+	`bytes`
+	`fmt`
+	`encoding/csv`
+	`encoding/json`
+	`os`
+	`reflect`
+	`strings`
 )
 
 const (
@@ -32,28 +30,10 @@ const (
 )
 
 var ReportFormats = [][]string {
-	[]string {"csv",  "Comma-Separated Value format"},
-	[]string {"nvp",  "Name-Value Pair format"},
-	[]string {"xml",  "eXtensible Markup Language"},
-	[]string {"json", "JavaScript Object Notation"},
-}
-
-// ErrorDecorator prepends function filename, line number, and function name
-// to error messages.
-func ErrorDecorator(err error) (error) {
-
-	var msg string
-
-	pc, file, line, success := runtime.Caller(1)
-	function := runtime.FuncForPC(pc)
-
-	if success {
-		msg = fmt.Sprintf("%s:%d: %s()", filepath.Base(file), line, function.Name())
-	} else {
-		msg = "unknown goroutine"
-	}
-
-	return fmt.Errorf("%s: %v", msg, err)
+	[]string {`csv`,  `Comma-Separated Value format`},
+	[]string {`nvp`,  `Name-Value Pair format`},
+	[]string {`xml`,  `eXtensible Markup Language`},
+	[]string {`json`, `JavaScript Object Notation`},
 }
 
 // ToCSV converts a single-tier struct to a string suitable for writing
@@ -64,7 +44,7 @@ func ToCSV (t interface{}) (b []byte, err error) {
 
 	var ssi [][]string
 
-	if ssi, err = ToSlice(t, "csv"); err == nil {
+	if ssi, err = ToSlice(t, `csv`); err == nil {
 
 		ss := make([][]string, 2)
 
@@ -77,10 +57,7 @@ func ToCSV (t interface{}) (b []byte, err error) {
 		cw := csv.NewWriter(bb)
 		cw.WriteAll(ss)
 
-		if b, err = bb.Bytes(), cw.Error(); err != nil {
-			err = ErrorDecorator(err)
-		}
-
+		b, err = bb.Bytes(), cw.Error()
 	}
 
 	return b, err
@@ -92,7 +69,7 @@ func ToNVP (t interface{}) (b []byte, err error) {
 
 	var ssi [][]string
 
-	if ssi, err = ToSlice(t, "nvp"); err == nil {
+	if ssi, err = ToSlice(t, `nvp`); err == nil {
 
 		var s string
 
@@ -117,10 +94,6 @@ func Save(t interface{}, fn string) (err error) {
 		err = je.Encode(&t)
 	}
 
-	if err != nil {
-		err = ErrorDecorator(err)
-	}
-
 	return err
 }
 
@@ -133,10 +106,6 @@ func Restore(fn string, t interface{}) (err error) {
 	if err == nil {
 		jd := json.NewDecoder(fh)
 		err = jd.Decode(&t)
-	}
-
-	if err != nil {
-		err = ErrorDecorator(err)
 	}
 
 	return err
@@ -157,24 +126,24 @@ func Compare(t1 interface{}, t2 interface{}) (ss[][]string, err error) {
 		lt1, lt2 int
 	)
 
-	if st1, err = ToSlice(t1, "cmp"); err != nil {
+	if st1, err = ToSlice(t1, `cmp`); err != nil {
 		return ss, err
 	}
 
-	if st2, err = ToSlice(t2, "cmp"); err != nil {
+	if st2, err = ToSlice(t2, `cmp`); err != nil {
 		return ss, err
 	}
 
 	if lt1, lt2 = len(st1), len(st2); lt1 != lt2 {
-		err = fmt.Errorf("field count: %d != %d", lt1, lt2)
-		return ss, ErrorDecorator(err)
+		err = fmt.Errorf(`field count: %d != %d`, lt1, lt2)
+		return ss, err
 	}
 
 	for i := 0; i < lt1; i++ {
 
 		if st1[i][NameIx] != st2[i][NameIx] {
-			err = fmt.Errorf("field name %d: %q != %q", i, st1[i][NameIx], st2[i][NameIx])
-			return ss, ErrorDecorator(err)
+			err = fmt.Errorf(`field name %d: %q != %q`, i, st1[i][NameIx], st2[i][NameIx])
+			return ss, err
 		}
 
 		if st1[i][ValueIx] != st2[i][ValueIx] {
@@ -196,15 +165,15 @@ func ToSlice(t interface{}, tag string) (ss[][]string, err error) {
 	v := reflect.ValueOf(t)
 
 	if v.Type().Kind() != reflect.Struct {
-		err = fmt.Errorf("kind %q is not %q", v.Type().Kind().String(), "struct")
-		return ss, ErrorDecorator(err)
+		err = fmt.Errorf(`kind %q is not %q`, v.Type().Kind().String(), `struct`)
+		return ss, err
 	}
 
 	OUTER:
 	for i := 0; i < v.NumField(); i++ {
 
 		fname := v.Type().Field(i).Name
-		fval := fmt.Sprintf("%v", v.Field(i).Interface())
+		fval := fmt.Sprintf(`%v`, v.Field(i).Interface())
 
 		// Process field tags. Function follows the same tag
 		// rules as encoding/xml and encoding/json, but only
@@ -213,14 +182,14 @@ func ToSlice(t interface{}, tag string) (ss[][]string, err error) {
 
 		if tval, ok := v.Type().Field(i).Tag.Lookup(tag); ok {
 
-			topt := strings.Split(tval, ",")
+			topt := strings.Split(tval, `,`)
 
 			// Look for unconditional skip or field alias.
 
 			switch {
-			case topt[0] == "":
+			case topt[0] == ``:
 				break
-			case topt[0] == "-":
+			case topt[0] == `-`:
 				continue OUTER
 			default:
 				fname = topt[0]
@@ -232,8 +201,8 @@ func ToSlice(t interface{}, tag string) (ss[][]string, err error) {
 
 			for j := 1; j < len(topt); j++ {
 				switch topt[j] {
-				case "omitempty":
-					if fval == "" {continue OUTER}
+				case `omitempty`:
+					if fval == `` {continue OUTER}
 				}
 			}
 		}

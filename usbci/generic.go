@@ -23,7 +23,7 @@ import (
 	`reflect`
 
 	`github.com/google/gousb`
-	`github.com/jscherff/gocmdb`
+	`github.com/jscherff/goutil`
 )
 
 const (
@@ -91,7 +91,7 @@ type Generic struct {
 	DescriptorSN string		`json:"descriptor_sn" csv:"-" nvp:"-"`
 
 	Changes	     [][]string		`json:"changes"       csv:"-" nvp:"-" cmp:"-"`
-	Vendor       map[string]string	`json:"vendor"        csv:"-" nvp:"-" cmp:"-"`
+	Vendor       map[string]string	`json:"vendor"        csv:"-" xml:"-" nvp:"-" cmp:"-"`
 
 }
 
@@ -198,12 +198,12 @@ func (this *Generic) Type() (string) {
 
 // Save saves the object to a JSON file.
 func (this *Generic) Save(fn string) (error) {
-	return gocmdb.Save(*this, fn)
+	return goutil.SaveObject(this, fn)
 }
 
 // RestoreFile restores the object from a JSON file.
 func (this *Generic) RestoreFile(fn string) (error) {
-	return gocmdb.Restore(fn, this)
+	return goutil.RestoreObject(fn, this)
 }
 
 // RestoreJSON restores the object from a JSON file.
@@ -224,7 +224,7 @@ func (this *Generic) CompareFile(fn string) (ss [][]string, err error) {
 		return ss, err
 	}
 
-	return gocmdb.Compare(*this, *gusb)
+	return goutil.CompareObjects(this, gusb, `cmp`)
 }
 
 // CompareJSON compares fields and properties and returns an array of differences.
@@ -240,7 +240,7 @@ func (this *Generic) CompareJSON(b []byte) (ss [][]string, err error) {
 		return ss, err
 	}
 
-	return gocmdb.Compare(*this, *gusb)
+	return goutil.CompareObjects(this, gusb, `cmp`)
 }
 
 // AuditFile calls CompareFile and places the results in the Changes field.
@@ -265,12 +265,6 @@ func (this *Generic) Matches(i interface{}) (bool) {
 	return reflect.DeepEqual(this, i)
 }
 
-// SetSerialNum sets the serial number property only. Does not change the
-// underlying serial number in the descriptor or on the device.
-func (this *Generic) SetSerial(val string) {
-	this.SerialNum = val
-}
-
 // Filename constructs a convenient filename from the bus number, bus address,
 // vendor ID, and product ID. Filenames guaranteed unique on a single computer.
 func (this *Generic) Filename() (string) {
@@ -290,30 +284,30 @@ func (this *Generic) Legacy() ([]byte) {
 
 // JSON reports all unfiltered fields in JSON format.
 func (this *Generic) JSON() ([]byte, error) {
-	return json.Marshal(*this)
+	return json.Marshal(this)
 }
 
 // XML reports all unfiltered fields in XML format.
 func (this *Generic) XML() ([]byte, error) {
-	return xml.Marshal(*this)
+	return xml.Marshal(this)
 }
 
 // CSV reports all unfiltered fields in CSV format.
 func (this *Generic) CSV() ([]byte, error) {
-	return gocmdb.ToCSV(*this)
+	return goutil.ObjectToCSV(this)
 }
 
 // NVP reports all unfiltered fields as name-value pairs.
 func (this *Generic) NVP() ([]byte, error) {
-	return gocmdb.ToNVP(*this)
+	return goutil.ObjectToNVP(this)
 }
 
 // PrettyJSON reports all unfiltered fields in formatted JSON format.
 func (this *Generic) PrettyJSON() ([]byte, error) {
-	return json.MarshalIndent(*this, MarshalPrefix, MarshalIndent)
+	return json.MarshalIndent(this, MarshalPrefix, MarshalIndent)
 }
 
 // PrettyXML reports all unfiltered fields in formatted XML format.
 func (this *Generic) PrettyXML() ([]byte, error) {
-	return xml.MarshalIndent(*this, MarshalPrefix, MarshalIndent)
+	return xml.MarshalIndent(this, MarshalPrefix, MarshalIndent)
 }

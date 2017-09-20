@@ -260,6 +260,16 @@ func (this *Generic) AddChange(f, o, n string) {
 	this.Changes = append(this.Changes, []string{f, o, n})
 }
 
+// SetChanges sets the device Changes slice to the results of an audit.
+func (this *Generic) SetChanges(ss [][]string) {
+	this.Changes = ss
+}
+
+// GetChanges returns the device Changes slice.
+func (this *Generic) GetChanges() ([][]string) {
+	return this.Changes
+}
+
 // Matches returns true if the objects and their properties are identical.
 func (this *Generic) Matches(i interface{}) (bool) {
 	return reflect.DeepEqual(this, i)

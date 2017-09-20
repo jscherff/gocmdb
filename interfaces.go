@@ -42,6 +42,8 @@ type Comparable interface {
 	AuditFile(string) (error)
 	AuditJSON([]byte) (error)
 	AddChange(string, string, string)
+	SetChanges([][]string)
+	GetChanges() ([][]string)
 	Matches(interface{}) (bool)
 }
 

@@ -13,3 +13,73 @@
 // limitations under the License.
 
 package gocmdb
+
+type Identifiable interface {
+	ID() (string)
+	VID() (string)
+	PID() (string)
+	Host() (string)
+	Type() (string)
+}
+
+type Reportable interface {
+	JSON() ([]byte, error)
+	XML() ([]byte, error)
+	CSV() ([]byte, error)
+	NVP() ([]byte, error)
+	Legacy() ([]byte)
+	PrettyJSON() ([]byte, error)
+	PrettyXML() ([]byte, error)
+	Filename() (string)
+}
+
+type Comparable interface {
+	Save(string) (error)
+	RestoreFile(string) (error)
+	RestoreJSON([]byte) (error)
+	CompareFile(string) ([][]string, error)
+	CompareJSON([]byte) ([][]string, error)
+	AuditFile(string) (error)
+	AuditJSON([]byte) (error)
+	AddChange(string, string, string)
+	SetChanges([][]string)
+	GetChanges() ([][]string)
+	Matches(interface{}) (bool)
+}
+
+type Resettable interface {
+	Refresh() (map[string]bool)
+	Reset() (error)
+}
+
+type Registerable interface {
+	Identifiable
+	Reportable
+}
+
+type Auditable interface {
+	Identifiable
+	Reportable
+	Comparable
+}
+
+type Configurable interface {
+	Identifiable
+	Reportable
+	Comparable
+	Resettable
+	GetDeviceSN() (string, error)
+	SetDeviceSN(string) (error)
+	EraseDeviceSN() (error)
+	SetFactorySN(string) (error)
+	CopyFactorySN(int) (error)
+}
+
+type GenericUSB interface {
+	Auditable
+	Resettable
+}
+
+type MagtekUSB interface {
+	Configurable
+}

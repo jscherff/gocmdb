@@ -44,7 +44,6 @@ type Comparable interface {
 	AddChange(string, string, string)
 	SetChanges([][]string)
 	GetChanges() ([][]string)
-	Matches(interface{}) (bool)
 }
 
 type Resettable interface {

@@ -270,11 +270,6 @@ func (this *Generic) GetChanges() ([][]string) {
 	return this.Changes
 }
 
-// Matches returns true if the objects and their properties are identical.
-func (this *Generic) Matches(i interface{}) (bool) {
-	return reflect.DeepEqual(this, i)
-}
-
 // Filename constructs a convenient filename from the bus number, bus address,
 // vendor ID, and product ID. Filenames guaranteed unique on a single computer.
 func (this *Generic) Filename() (string) {

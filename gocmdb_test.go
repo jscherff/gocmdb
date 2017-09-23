@@ -493,7 +493,7 @@ func TestChangeMethods(t *testing.T) {
 
 func TestSerialMethods(t *testing.T) {
 
-	t.Run("Magtek Sureswipe Card Reader", func(t *testing.T) {
+	t.Run("magtek Sureswipe Card Reader", func(t *testing.T) {
 
 		ctx := gousb.NewContext()
 		defer ctx.Close()
@@ -545,7 +545,7 @@ func TestSerialMethods(t *testing.T) {
 		gotest.Ok(t, err)
 	})
 
-	t.Run("Magtek Dynamag Card Reader", func(t *testing.T) {
+	t.Run("magtek Dynamag Card Reader", func(t *testing.T) {
 
 		ctx := gousb.NewContext()
 		defer ctx.Close()

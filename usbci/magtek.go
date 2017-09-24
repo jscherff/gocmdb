@@ -24,7 +24,8 @@ import (
 )
 
 const (
-	MagtekVendorID uint16 = 0x0801
+	MagtekVID uint16 = 0x0801
+	MagtekPID uint16 = 0x0001
 
 	SureswipeKbPID uint16 = 0x0001
 	SureswipeHidPID uint16 = 0x0002

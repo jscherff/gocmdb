@@ -224,7 +224,7 @@ func (this *Generic) CompareFile(fn string) (ss [][]string, err error) {
 		return ss, err
 	}
 
-	return goutil.CompareObjects(this, gusb, `cmp`)
+	return goutil.CompareObjects(gusb, this, `cmp`)
 }
 
 // CompareJSON compares fields and properties and returns an array of differences.
@@ -240,7 +240,7 @@ func (this *Generic) CompareJSON(b []byte) (ss [][]string, err error) {
 		return ss, err
 	}
 
-	return goutil.CompareObjects(this, gusb, `cmp`)
+	return goutil.CompareObjects(gusb, this, `cmp`)
 }
 
 // AuditFile calls CompareFile and places the results in the Changes field.

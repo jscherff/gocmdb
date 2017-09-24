@@ -346,11 +346,11 @@ func TestCompareMethods(t *testing.T) {
 
 		ss1, err := mag3.CompareFile(fn1)
 		gotest.Ok(t, err)
-		gotest.Assert(t, len(ss1) == 0, `cloned device should match parent device`)
+		gotest.Assert(t, len(ss1) == 0, `device should match its clone`)
 
 		ss2, err := mag3.CompareFile(fn2)
 		gotest.Ok(t, err)
-		gotest.Assert(t, len(ss2) == 2, `cloned device should not match a modified device`)
+		gotest.Assert(t, len(ss2) == 2, `modified device should not match original`)
 	})
 
 	t.Run("JSON() and CompareJSON()", func(t *testing.T) {
@@ -369,11 +369,11 @@ func TestCompareMethods(t *testing.T) {
 
 		ss1, err := mag3.CompareJSON(j1)
 		gotest.Ok(t, err)
-		gotest.Assert(t, len(ss1) == 0, `cloned device should match parent device`)
+		gotest.Assert(t, len(ss1) == 0, `device should match its clone`)
 
 		ss2, err := mag3.CompareJSON(j2)
 		gotest.Ok(t, err)
-		gotest.Assert(t, len(ss2) == 2, `cloned device should not match a modified device`)
+		gotest.Assert(t, len(ss2) == 2, `modified device should not match original`)
 	})
 }
 
@@ -384,7 +384,7 @@ func TestAuditMethods(t *testing.T) {
 		mag3, err := usbci.NewMagtek(nil)
 		gotest.Ok(t, err)
 
-		err = mag3.RestoreJSON(mag1JSON)
+		err = mag3.RestoreJSON(mag2JSON)
 		gotest.Ok(t, err)
 
 		fn1 := filepath.Join(os.Getenv(`TEMP`), `mag1.json`)
@@ -396,13 +396,13 @@ func TestAuditMethods(t *testing.T) {
 		err = mag2.Save(fn2)
 		gotest.Ok(t, err)
 
-		err = mag3.AuditFile(fn1)
-		gotest.Ok(t, err)
-		gotest.Assert(t, len(mag3.Changes) == 0, `cloned device should match parent device`)
-
 		err = mag3.AuditFile(fn2)
 		gotest.Ok(t, err)
-		gotest.Assert(t, len(mag3.Changes) == 2, `cloned device should not match a modified device`)
+		gotest.Assert(t, len(mag3.Changes) == 0, `device should match its clone`)
+
+		err = mag3.AuditFile(fn1)
+		gotest.Ok(t, err)
+		gotest.Assert(t, len(mag3.Changes) == 2, `modified device should not match original`)
 
 		if len(mag3.Changes) < 2 { return }
 
@@ -417,7 +417,7 @@ func TestAuditMethods(t *testing.T) {
 		mag3, err := usbci.NewMagtek(nil)
 		gotest.Ok(t, err)
 
-		err = mag3.RestoreJSON(mag1JSON)
+		err = mag3.RestoreJSON(mag2JSON)
 		gotest.Ok(t, err)
 
 		j1, err := mag1.JSON()
@@ -426,13 +426,13 @@ func TestAuditMethods(t *testing.T) {
 		j2, err := mag2.JSON()
 		gotest.Ok(t, err)
 
-		err = mag3.AuditJSON(j1)
-		gotest.Ok(t, err)
-		gotest.Assert(t, len(mag3.Changes) == 0, `cloned device should match parent device`)
-
 		err = mag3.AuditJSON(j2)
 		gotest.Ok(t, err)
-		gotest.Assert(t, len(mag3.Changes) == 2, `cloned device should not match a modified device`)
+		gotest.Assert(t, len(mag3.Changes) == 0, `device should match its clone`)
+
+		err = mag3.AuditJSON(j1)
+		gotest.Ok(t, err)
+		gotest.Assert(t, len(mag3.Changes) == 2, `modified device should not match original`)
 
 		if len(mag3.Changes) < 2 { return }
 
@@ -467,15 +467,15 @@ func TestChangeMethods(t *testing.T) {
 			`(device).Changes contains bad data`)
 	})
 
-	t.Run("SetChanges() adn GetChanges()", func(t *testing.T) {
+	t.Run("SetChanges() and GetChanges()", func(t *testing.T) {
 
 		mag3, err := usbci.NewMagtek(nil)
 		gotest.Ok(t, err)
 
-		err = mag3.RestoreJSON(mag1JSON)
+		err = mag3.RestoreJSON(mag2JSON)
 		gotest.Ok(t, err)
 
-		ss, err := mag3.CompareJSON(mag2JSON)
+		ss, err := mag3.CompareJSON(mag1JSON)
 		gotest.Ok(t, err)
 
 		mag3.SetChanges(ss)

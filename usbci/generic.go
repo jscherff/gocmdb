@@ -90,8 +90,8 @@ type Generic struct {
 	FactorySN    string		`json:"factory_sn"    csv:"-" nvp:"-"`
 	DescriptorSN string		`json:"descriptor_sn" csv:"-" nvp:"-"`
 
-	Changes	     [][]string		`json:"changes"       csv:"-" nvp:"-" cmp:"-"`
-	Vendor       map[string]string	`json:"vendor"        csv:"-" xml:"-" nvp:"-" cmp:"-"`
+	Changes	     [][]string		`json:"-" csv:"-" xml:"-" nvp:"-" cmp:"-"`
+	Vendor       map[string]string	`json:"-" csv:"-" xml:"-" nvp:"-" cmp:"-"`
 
 }
 

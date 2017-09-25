@@ -17,7 +17,6 @@ package gocmdb
 import (
 	`crypto/sha256`
 	`fmt`
-	`log`
 	`os`
 	`path/filepath`
 	`reflect`
@@ -26,31 +25,6 @@ import (
 	`github.com/jscherff/gocmdb/usbci`
 	`github.com/jscherff/gotest`
 )
-
-func init() {
-
-	var errM1, errM2, errG1, errG2 error
-
-	if mag1, errM1 = usbci.NewMagtek(nil); errM1 == nil {
-		errM1 = mag1.RestoreJSON(mag1JSON)
-	}
-
-	if mag2, errM2 = usbci.NewMagtek(nil); errM2 == nil {
-		errM2 = mag2.RestoreJSON(mag2JSON)
-	}
-
-	if gen1, errG1 = usbci.NewGeneric(nil); errG1 == nil {
-		errG1 = gen1.RestoreJSON(gen1JSON)
-	}
-
-	if gen2, errG2 = usbci.NewGeneric(nil); errG2 == nil {
-		errG2 = gen2.RestoreJSON(gen2JSON)
-	}
-
-	if errM1 != nil || errM2 != nil || errG1 != nil || errG2 != nil {
-		log.Fatalln(`Testing setup failed: could not restore devices.`)
-	}
-}
 
 func TestGetterMethods(t *testing.T) {
 

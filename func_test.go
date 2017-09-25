@@ -62,31 +62,31 @@ func TestReportMethods(t *testing.T) {
 
 	b, err = mag1.PrettyJSON()
 	gotest.Ok(t, err)
-	gotest.Assert(t, mag1SigPJSON == sha256.Sum256(b), `unexpected hash signature of JSON output`)
+	gotest.Assert(t, sha256.Sum256(b) == mag1SigPJSON, `unexpected hash signature of JSON output`)
 
 	b, err = mag1.JSON()
 	gotest.Ok(t, err)
-	gotest.Assert(t, mag1SigJSON == sha256.Sum256(b), `unexpected hash signature of NVP output`)
+	gotest.Assert(t, sha256.Sum256(b) == mag1SigJSON, `unexpected hash signature of NVP output`)
 
 	b, err = mag1.PrettyXML()
 	gotest.Ok(t, err)
-	gotest.Assert(t, mag1SigPXML == sha256.Sum256(b), `unexpected hash signature of XML output`)
+	gotest.Assert(t, sha256.Sum256(b) == mag1SigPXML, `unexpected hash signature of XML output`)
 
 	b, err = mag1.XML()
 	gotest.Ok(t, err)
-	gotest.Assert(t, mag1SigXML == sha256.Sum256(b), `unexpected hash signature of NVP output`)
+	gotest.Assert(t, sha256.Sum256(b) == mag1SigXML, `unexpected hash signature of NVP output`)
 
 	b, err = mag1.CSV()
 	gotest.Ok(t, err)
-	gotest.Assert(t, mag1SigCSV == sha256.Sum256(b), `unexpected hash signature of CSV output`)
+	gotest.Assert(t, sha256.Sum256(b) == mag1SigCSV, `unexpected hash signature of CSV output`)
 
 	b, err = mag1.NVP()
 	gotest.Ok(t, err)
-	gotest.Assert(t, mag1SigNVP == sha256.Sum256(b), `unexpected hash signature of NVP output`)
+	gotest.Assert(t, sha256.Sum256(b) == mag1SigNVP, `unexpected hash signature of NVP output`)
 
 	b = mag1.Legacy()
 	gotest.Ok(t, err)
-	gotest.Assert(t, mag1SigLegacy == sha256.Sum256(b), `unexpected hash signature of NVP output`)
+	gotest.Assert(t, sha256.Sum256(b) == mag1SigLegacy, `unexpected hash signature of NVP output`)
 }
 
 func TestPersistenceMethods(t *testing.T) {
@@ -299,10 +299,11 @@ func TestSerialMethods(t *testing.T) {
 
 		dev, err := ctx.OpenDeviceWithVIDPID(0x0801, 0x0001)
 
-		if err != nil {
+		if err == gousb.ErrorNoDevice || err == gousb.ErrorNotFound {
 			t.Skip(`no compatible devices found`)
 		}
 
+		gotest.Ok(t, err)
 		defer dev.Close()
 
 		// Set device SN
@@ -351,10 +352,11 @@ func TestSerialMethods(t *testing.T) {
 
 		dev, err := ctx.OpenDeviceWithVIDPID(0x0801, 0x0001)
 
-		if err != nil {
+		if err == gousb.ErrorNoDevice || err == gousb.ErrorNotFound {
 			t.Skip(`no compatible devices found`)
 		}
 
+		gotest.Ok(t, err)
 		defer dev.Close()
 
 		mdev, err := usbci.NewMagtek(dev)

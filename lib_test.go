@@ -91,31 +91,31 @@ func TestReportMethods(t *testing.T) {
 
 	b, err = mag1.PrettyJSON()
 	gotest.Ok(t, err)
-	gotest.Assert(t, mag1ShaPrettyJSON == sha256.Sum256(b), `unexpected hash signature of JSON output`)
+	gotest.Assert(t, mag1SigPrettyJSON == sha256.Sum256(b), `unexpected hash signature of JSON output`)
 
 	b, err = mag1.JSON()
 	gotest.Ok(t, err)
-	gotest.Assert(t, mag1ShaJSON == sha256.Sum256(b), `unexpected hash signature of NVP output`)
+	gotest.Assert(t, mag1SigJSON == sha256.Sum256(b), `unexpected hash signature of NVP output`)
 
 	b, err = mag1.PrettyXML()
 	gotest.Ok(t, err)
-	gotest.Assert(t, mag1ShaPrettyXML == sha256.Sum256(b), `unexpected hash signature of XML output`)
+	gotest.Assert(t, mag1SigPrettyXML == sha256.Sum256(b), `unexpected hash signature of XML output`)
 
 	b, err = mag1.XML()
 	gotest.Ok(t, err)
-	gotest.Assert(t, mag1ShaXML == sha256.Sum256(b), `unexpected hash signature of NVP output`)
+	gotest.Assert(t, mag1SigXML == sha256.Sum256(b), `unexpected hash signature of NVP output`)
 
 	b, err = mag1.CSV()
 	gotest.Ok(t, err)
-	gotest.Assert(t, mag1ShaCSV == sha256.Sum256(b), `unexpected hash signature of CSV output`)
+	gotest.Assert(t, mag1SigCSV == sha256.Sum256(b), `unexpected hash signature of CSV output`)
 
 	b, err = mag1.NVP()
 	gotest.Ok(t, err)
-	gotest.Assert(t, mag1ShaNVP == sha256.Sum256(b), `unexpected hash signature of NVP output`)
+	gotest.Assert(t, mag1SigNVP == sha256.Sum256(b), `unexpected hash signature of NVP output`)
 
 	b = mag1.Legacy()
 	gotest.Ok(t, err)
-	gotest.Assert(t, mag1ShaLegacy == sha256.Sum256(b), `unexpected hash signature of NVP output`)
+	gotest.Assert(t, mag1SigLegacy == sha256.Sum256(b), `unexpected hash signature of NVP output`)
 }
 
 func TestPersistenceMethods(t *testing.T) {

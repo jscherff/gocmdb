@@ -29,7 +29,7 @@ import (
 
 func init() {
 
-	magChanges[0] = []string{`SoftwareID`, `21042818B01`, `21042818B02`}
+	magChanges[0] = []string{`SoftwareID`, `21042840G01`, `21042840G02`}
 	magChanges[1] = []string{`USBSpec`, `1.10`, `2.00`}
 
 	var errM1, errM2, errG1, errG2 error
@@ -51,7 +51,7 @@ func init() {
 	}
 
 	if errM1 != nil || errM2 != nil || errG1 != nil || errG2 != nil {
-		log.Fatal(os.Stderr, "Testing setup failed: could not restore devices.")
+		log.Fatalln(`Testing setup failed: could not restore devices.`)
 	}
 }
 
@@ -91,7 +91,7 @@ func TestReportMethods(t *testing.T) {
 
 	b, err = mag1.PrettyJSON()
 	gotest.Ok(t, err)
-	gotest.Assert(t, mag1SigPrettyJSON == sha256.Sum256(b), `unexpected hash signature of JSON output`)
+	gotest.Assert(t, mag1SigPJSON == sha256.Sum256(b), `unexpected hash signature of JSON output`)
 
 	b, err = mag1.JSON()
 	gotest.Ok(t, err)
@@ -99,7 +99,7 @@ func TestReportMethods(t *testing.T) {
 
 	b, err = mag1.PrettyXML()
 	gotest.Ok(t, err)
-	gotest.Assert(t, mag1SigPrettyXML == sha256.Sum256(b), `unexpected hash signature of XML output`)
+	gotest.Assert(t, mag1SigPXML == sha256.Sum256(b), `unexpected hash signature of XML output`)
 
 	b, err = mag1.XML()
 	gotest.Ok(t, err)

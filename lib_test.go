@@ -29,9 +29,6 @@ import (
 
 func init() {
 
-	magChanges[0] = []string{`SoftwareID`, `21042840G01`, `21042840G02`}
-	magChanges[1] = []string{`USBSpec`, `1.10`, `2.00`}
-
 	var errM1, errM2, errG1, errG2 error
 
 	if mag1, errM1 = usbci.NewMagtek(nil); errM1 == nil {

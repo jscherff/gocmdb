@@ -1,3 +1,2 @@
 - Enumerate all devices, create inventory items for all of them.
 - Download known VID/PID data and use in inventory process.
-- Consolidate DevSpec and DevInfo, then consolidate result into Device.

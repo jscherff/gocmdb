@@ -73,9 +73,9 @@ type Generic struct {
 	SoftwareID   string		`json:"software_id"   csv:"software_id"`
 	ProductVer   string		`json:"product_ver"   csv:"product_ver"`
 
+	PortNumber   int		`json:"port_number"   csv:"-" nvp:"-" cmp:"-"`
 	BusNumber    int		`json:"bus_number"    csv:"-" nvp:"-" cmp:"-"`
 	BusAddress   int		`json:"bus_address"   csv:"-" nvp:"-" cmp:"-"`
-	PortNumber   int		`json:"port_number"   csv:"-" nvp:"-" cmp:"-"`
 	BufferSize   int		`json:"buffer_size"   csv:"-" nvp:"-"`
 	MaxPktSize   int		`json:"max_pkt_size"  csv:"-" nvp:"-"`
 	USBSpec	     string		`json:"usb_spec"      csv:"-" nvp:"-"`

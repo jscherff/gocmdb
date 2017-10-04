@@ -273,10 +273,9 @@ func (this *Generic) GetChanges() ([][]string) {
 // Filename constructs a convenient filename from the bus number, bus address,
 // vendor ID, and product ID. Filenames guaranteed unique on a single computer.
 func (this *Generic) Filename() (string) {
-	return fmt.Sprintf(`%03d-%03d-%03d-%s-%s`,
-		this.BusNumber,
-		this.BusAddress,
+	return fmt.Sprintf(`%03d-%03d-%s-%s`,
 		this.PortNumber,
+		this.BusNumber,
 		this.VendorID,
 		this.ProductID,
 	)

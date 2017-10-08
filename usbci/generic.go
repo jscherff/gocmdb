@@ -67,11 +67,12 @@ type Generic struct {
 	HostName     string		`json:"host_name"     csv:"host_name"`
 	VendorID     string		`json:"vendor_id"     csv:"vendor_id"`
 	ProductID    string		`json:"product_id"    csv:"product_id"`
+	SerialNum    string		`json:"serial_number" csv:"serial_number"`
 	VendorName   string		`json:"vendor_name"   csv:"vendor_name"`
 	ProductName  string		`json:"product_name"  csv:"product_name"`
-	SerialNum    string		`json:"serial_num"    csv:"serial_num"`
-	SoftwareID   string		`json:"software_id"   csv:"software_id"`
 	ProductVer   string		`json:"product_ver"   csv:"product_ver"`
+	FirmwareVer  string		`json:"firmware_ver"  csv:"firmware_ver"`
+	SoftwareID   string		`json:"software_id"   csv:"software_id"`
 
 	PortNumber   int		`json:"port_number"   csv:"-" nvp:"-" cmp:"-"`
 	BusNumber    int		`json:"bus_number"    csv:"-" nvp:"-" cmp:"-"`

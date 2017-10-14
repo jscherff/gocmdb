@@ -81,7 +81,7 @@ type Generic struct {
 	MaxPktSize   int		`json:"max_pkt_size"  csv:"-" nvp:"-"`
 	USBSpec	     string		`json:"usb_spec"      csv:"-" nvp:"-"`
 	USBClass     string		`json:"usb_class"     csv:"-" nvp:"-"`
-	USBSubclass  string		`json:"usb_subclass"  csv:"-" nvp:"-"`
+	USBSubClass  string		`json:"usb_subclass"  csv:"-" nvp:"-"`
 	USBProtocol  string		`json:"usb_protocol"  csv:"-" nvp:"-"`
 	DeviceSpeed  string		`json:"device_speed"  csv:"-" nvp:"-"`
 	DeviceVer    string		`json:"device_ver"    csv:"-" nvp:"-"`
@@ -150,7 +150,7 @@ func (this *Generic) Init() (errs map[string]bool) {
 	this.PortNumber = this.Desc.Port
 	this.USBSpec = this.Desc.Spec.String()
 	this.USBClass = this.Desc.Class.String()
-	this.USBSubclass = this.Desc.SubClass.String()
+	this.USBSubClass = this.Desc.SubClass.String()
 	this.USBProtocol = this.Desc.Protocol.String()
 	this.DeviceSpeed = this.Desc.Speed.String()
 	this.DeviceVer = this.Desc.Device.String()

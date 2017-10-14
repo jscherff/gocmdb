@@ -39,7 +39,7 @@ type UsbCi struct {
 
 	USBSpec	     string		`json:"usb_spec"      db:"usb_spec"`
 	USBClass     string		`json:"usb_class"     db:"usb_class"`
-	USBSubclass  string		`json:"usb_subclass"  db:"usb_subclass"`
+	USBSubClass  string		`json:"usb_subclass"  db:"usb_subclass"`
 	USBProtocol  string		`json:"usb_protocol"  db:"usb_protocol"`
 	DeviceSpeed  string		`json:"device_speed"  db:"device_speed"`
 	DeviceVer    string		`json:"device_ver"    db:"device_ver"`
@@ -75,7 +75,7 @@ func (this *UsbCi) GetBufferSize() (int) { return this.BufferSize }
 func (this *UsbCi) GetMaxPktSize() (int) { return this.MaxPktSize }
 func (this *UsbCi) GetUSBSpec() (string) { return this.USBSpec }
 func (this *UsbCi) GetUSBClass() (string) { return this.USBClass }
-func (this *UsbCi) GetUSBSubclass() (string) { return this.USBSubclass }
+func (this *UsbCi) GetUSBSubClass() (string) { return this.USBSubClass }
 func (this *UsbCi) GetUSBProtocol() (string) { return this.USBProtocol }
 func (this *UsbCi) GetDeviceSpeed() (string) { return this.DeviceSpeed }
 func (this *UsbCi) GetDeviceVer() (string) { return this.DeviceVer }

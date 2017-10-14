@@ -14,28 +14,28 @@ import (
 
 func TestGetterMethods(t *testing.T) {
 
-	gotest.Assert(t, mag1.ID() == mag1.SerialNum, `ID() does not match (device).SerialNum`)
-	gotest.Assert(t, mag1.VID() == mag1.VendorID, `VID() does not match (device).VenndorID`)
-	gotest.Assert(t, mag1.PID() == mag1.ProductID, `PID() does not match (device).ProductID`)
-	gotest.Assert(t, mag1.Type() == reflect.TypeOf(mag1).String(), `Type does not match TypeOf(device)`)
+	gotest.Assert(t, mag[`mag1`].ID() == mag[`mag1`].SerialNum, `ID() does not match (device).SerialNum`)
+	gotest.Assert(t, mag[`mag1`].VID() == mag[`mag1`].VendorID, `VID() does not match (device).VenndorID`)
+	gotest.Assert(t, mag[`mag1`].PID() == mag[`mag1`].ProductID, `PID() does not match (device).ProductID`)
+	gotest.Assert(t, mag[`mag1`].Type() == fmt.Sprintf(`%T`, mag[`mag1`]), `Type does not match TypeOf(device)`)
 
 	if hostName, err := os.Hostname(); err != nil {
 		return
 	} else {
-		gotest.Assert(t, mag1.Host() == hostName, `Host() does not match os.Hostname()`)
+		gotest.Assert(t, mag[`mag1`].Host() == hostName, `Host() does not match os.Hostname()`)
 	}
 }
 
 func TestFilenameMethod(t *testing.T) {
 
 	fileName := fmt.Sprintf(`%03d-%03d-%s-%s`,
-                mag1.PortNumber,
-                mag1.BusNumber,
-                mag1.VendorID,
-                mag1.ProductID,
+                mag[`mag1`].PortNumber,
+                mag[`mag1`].BusNumber,
+                mag[`mag1`].VendorID,
+                mag[`mag1`].ProductID,
         )
 
-	gotest.Assert(t, mag1.Filename() == fileName, `(device).Filename() string incorrect`)
+	gotest.Assert(t, mag[`mag1`].Filename() == fileName, `(device).Filename() string incorrect`)
 }
 
 func TestReportMethods(t *testing.T) {
@@ -45,33 +45,33 @@ func TestReportMethods(t *testing.T) {
 		err error
 	)
 
-	b, err = mag1.PrettyJSON()
+	b, err = mag[`mag1`].PrettyJSON()
 	gotest.Ok(t, err)
-	gotest.Assert(t, sha256.Sum256(b) == mag1SigPJSON, `unexpected hash signature of JSON output`)
+	gotest.Assert(t, sha256.Sum256(b) == sigPrettyJSON[`mag1`], `unexpected hash signature of JSON output`)
 
-	b, err = mag1.JSON()
+	b, err = mag[`mag1`].JSON()
 	gotest.Ok(t, err)
-	gotest.Assert(t, sha256.Sum256(b) == mag1SigJSON, `unexpected hash signature of NVP output`)
+	gotest.Assert(t, sha256.Sum256(b) == sigJSON[`mag1`], `unexpected hash signature of NVP output`)
 
-	b, err = mag1.PrettyXML()
+	b, err = mag[`mag1`].PrettyXML()
 	gotest.Ok(t, err)
-	gotest.Assert(t, sha256.Sum256(b) == mag1SigPXML, `unexpected hash signature of XML output`)
+	gotest.Assert(t, sha256.Sum256(b) == sigPrettyXML[`mag1`], `unexpected hash signature of XML output`)
 
-	b, err = mag1.XML()
+	b, err = mag[`mag1`].XML()
 	gotest.Ok(t, err)
-	gotest.Assert(t, sha256.Sum256(b) == mag1SigXML, `unexpected hash signature of NVP output`)
+	gotest.Assert(t, sha256.Sum256(b) == sigXML[`mag1`], `unexpected hash signature of NVP output`)
 
-	b, err = mag1.CSV()
+	b, err = mag[`mag1`].CSV()
 	gotest.Ok(t, err)
-	gotest.Assert(t, sha256.Sum256(b) == mag1SigCSV, `unexpected hash signature of CSV output`)
+	gotest.Assert(t, sha256.Sum256(b) == sigCSV[`mag1`], `unexpected hash signature of CSV output`)
 
-	b, err = mag1.NVP()
+	b, err = mag[`mag1`].NVP()
 	gotest.Ok(t, err)
-	gotest.Assert(t, sha256.Sum256(b) == mag1SigNVP, `unexpected hash signature of NVP output`)
+	gotest.Assert(t, sha256.Sum256(b) == sigNVP[`mag1`], `unexpected hash signature of NVP output`)
 
-	b = mag1.Legacy()
+	b = mag[`mag1`].Legacy()
 	gotest.Ok(t, err)
-	gotest.Assert(t, sha256.Sum256(b) == mag1SigLegacy, `unexpected hash signature of NVP output`)
+	gotest.Assert(t, sha256.Sum256(b) == sigLegacy[`mag1`], `unexpected hash signature of NVP output`)
 }
 
 func TestPersistenceMethods(t *testing.T) {
@@ -82,7 +82,7 @@ func TestPersistenceMethods(t *testing.T) {
 
 		fn := filepath.Join(os.Getenv(`TEMP`), `mag1.json`)
 
-		err = mag1.Save(fn)
+		err = mag[`mag1`].Save(fn)
 		gotest.Ok(t, err)
 
 		mag3, err := usbci.NewMagtek(nil)
@@ -91,12 +91,12 @@ func TestPersistenceMethods(t *testing.T) {
 		err = mag3.RestoreFile(fn)
 		gotest.Ok(t, err)
 
-		gotest.Assert(t, reflect.DeepEqual(mag1, mag3), `restored device not identical to saved device`)
+		gotest.Assert(t, reflect.DeepEqual(mag[`mag1`], mag3), `restored device not identical to saved device`)
 	})
 
 	t.Run("JSON() and RestoreJSON()", func(t *testing.T) {
 
-		j, err := mag1.JSON()
+		j, err := mag[`mag1`].JSON()
 		gotest.Ok(t, err)
 
 		mag3, err := usbci.NewMagtek(nil)
@@ -105,7 +105,7 @@ func TestPersistenceMethods(t *testing.T) {
 		err = mag3.RestoreJSON(j)
 		gotest.Ok(t, err)
 
-		gotest.Assert(t, reflect.DeepEqual(mag1, mag3), `restored device not identical to saved device`)
+		gotest.Assert(t, reflect.DeepEqual(mag[`mag1`], mag3), `restored device not identical to saved device`)
 	})
 }
 
@@ -116,16 +116,16 @@ func TestCompareMethods(t *testing.T) {
 		mag3, err := usbci.NewMagtek(nil)
 		gotest.Ok(t, err)
 
-		err = mag3.RestoreJSON(mag1JSON)
+		err = mag3.RestoreJSON(magJSON[`mag1`])
 		gotest.Ok(t, err)
 
 		fn1 := filepath.Join(os.Getenv(`TEMP`), `mag1.json`)
 		fn2 := filepath.Join(os.Getenv(`TEMP`), `mag2.json`)
 
-		err = mag1.Save(fn1)
+		err = mag[`mag1`].Save(fn1)
 		gotest.Ok(t, err)
 
-		err = mag2.Save(fn2)
+		err = mag[`mag2`].Save(fn2)
 		gotest.Ok(t, err)
 
 		ss1, err := mag3.CompareFile(fn1)
@@ -142,13 +142,13 @@ func TestCompareMethods(t *testing.T) {
 		mag3, err := usbci.NewMagtek(nil)
 		gotest.Ok(t, err)
 
-		err = mag3.RestoreJSON(mag1JSON)
+		err = mag3.RestoreJSON(magJSON[`mag1`])
 		gotest.Ok(t, err)
 
-		j1, err := mag1.JSON()
+		j1, err := mag[`mag1`].JSON()
 		gotest.Ok(t, err)
 
-		j2, err := mag2.JSON()
+		j2, err := mag[`mag2`].JSON()
 		gotest.Ok(t, err)
 
 		ss1, err := mag3.CompareJSON(j1)
@@ -168,16 +168,16 @@ func TestAuditMethods(t *testing.T) {
 		mag3, err := usbci.NewMagtek(nil)
 		gotest.Ok(t, err)
 
-		err = mag3.RestoreJSON(mag2JSON)
+		err = mag3.RestoreJSON(magJSON[`mag2`])
 		gotest.Ok(t, err)
 
 		fn1 := filepath.Join(os.Getenv(`TEMP`), `mag1.json`)
 		fn2 := filepath.Join(os.Getenv(`TEMP`), `mag2.json`)
 
-		err = mag1.Save(fn1)
+		err = mag[`mag1`].Save(fn1)
 		gotest.Ok(t, err)
 
-		err = mag2.Save(fn2)
+		err = mag[`mag2`].Save(fn2)
 		gotest.Ok(t, err)
 
 		err = mag3.AuditFile(fn2)
@@ -201,13 +201,13 @@ func TestAuditMethods(t *testing.T) {
 		mag3, err := usbci.NewMagtek(nil)
 		gotest.Ok(t, err)
 
-		err = mag3.RestoreJSON(mag2JSON)
+		err = mag3.RestoreJSON(magJSON[`mag2`])
 		gotest.Ok(t, err)
 
-		j1, err := mag1.JSON()
+		j1, err := mag[`mag1`].JSON()
 		gotest.Ok(t, err)
 
-		j2, err := mag2.JSON()
+		j2, err := mag[`mag2`].JSON()
 		gotest.Ok(t, err)
 
 		err = mag3.AuditJSON(j2)
@@ -236,7 +236,7 @@ func TestChangeMethods(t *testing.T) {
 		mag3, err := usbci.NewMagtek(nil)
 		gotest.Ok(t, err)
 
-		err = mag3.RestoreJSON(mag1JSON)
+		err = mag3.RestoreJSON(magJSON[`mag1`])
 		gotest.Ok(t, err)
 
 		mag3.AddChange(`SoftwareID`, `21042818B01`, `21042818B03`)
@@ -256,10 +256,10 @@ func TestChangeMethods(t *testing.T) {
 		mag3, err := usbci.NewMagtek(nil)
 		gotest.Ok(t, err)
 
-		err = mag3.RestoreJSON(mag2JSON)
+		err = mag3.RestoreJSON(magJSON[`mag2`])
 		gotest.Ok(t, err)
 
-		ss, err := mag3.CompareJSON(mag1JSON)
+		ss, err := mag3.CompareJSON(magJSON[`mag1`])
 		gotest.Ok(t, err)
 
 		mag3.SetChanges(ss)

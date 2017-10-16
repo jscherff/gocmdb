@@ -1,150 +1,52 @@
+// Copyright 2017 John Scherff
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package gocmdb
 
 import (
-	`crypto/sha256`
+	`encoding/json`
 	`log`
-	`testing`
-	`github.com/google/gousb`
+	`os`
 	`github.com/jscherff/gocmdb/usbci`
 )
 
+type TestData struct {
+	Jsn map[string][]byte
+	Mag map[string]*usbci.Magtek
+	Gen map[string]*usbci.Generic
+	Sig map[string]map[string][32]byte
+	Chg [][]string
+	Clg []string
+}
+
+var td *TestData
+
 func init() {
 
-	magChanges[0] = []string{`SoftwareID`, `21042840G01`, `21042840G02`}
-	magChanges[1] = []string{`USBSpec`, `1.10`, `2.00`}
+	td = new(TestData)
 
 	if err := createObjects(); err != nil {
 		log.Fatal(err)
 	}
-
-	if err := generateSigs(); err != nil {
-		log.Fatal(err)
-	}
 }
 
-func createObjects() (err error) {
+func createObjects() error {
 
-	for k, j := range magJSON {
-
-		if mag[k], err = usbci.NewMagtek(nil); err != nil {
-			return err
-		}
-		if err := mag[k].RestoreJSON(j); err != nil {
-			return err
-		}
-	}
-
-	for k, j := range genJSON {
-
-		if gen[k], err = usbci.NewGeneric(nil); err != nil {
-			return err
-		}
-		if err := gen[k].RestoreJSON(j); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func generateSigs() error {
-
-	for k := range magJSON {
-
-		if b, err := mag[k].CSV(); err != nil {
-			return err
-		} else {
-			sigCSV[k] = sha256.Sum256(b)
-		}
-		if b, err := mag[k].NVP(); err != nil {
-			return err
-		} else {
-			sigNVP[k] = sha256.Sum256(b)
-		}
-		if b, err := mag[k].XML(); err != nil {
-			return err
-		} else {
-			sigXML[k] = sha256.Sum256(b)
-		}
-		if b, err := mag[k].JSON(); err != nil {
-			return err
-		} else {
-			sigJSON[k] = sha256.Sum256(b)
-		}
-		if b, err := mag[k].PrettyXML(); err != nil {
-			return err
-		} else {
-			sigPrettyXML[k] = sha256.Sum256(b)
-		}
-		if b, err := mag[k].PrettyJSON(); err != nil {
-			return err
-		} else {
-			sigPrettyJSON[k] = sha256.Sum256(b)
-		}
-
-		b := mag[k].Legacy()
-		sigLegacy[k] = sha256.Sum256(b)
-	}
-
-	for k := range genJSON {
-
-		if b, err := gen[k].CSV(); err != nil {
-			return err
-		} else {
-			sigCSV[k] = sha256.Sum256(b)
-		}
-		if b, err := gen[k].NVP(); err != nil {
-			return err
-		} else {
-			sigNVP[k] = sha256.Sum256(b)
-		}
-		if b, err := gen[k].XML(); err != nil {
-			return err
-		} else {
-			sigXML[k] = sha256.Sum256(b)
-		}
-		if b, err := gen[k].JSON(); err != nil {
-			return err
-		} else {
-			sigJSON[k] = sha256.Sum256(b)
-		}
-		if b, err := gen[k].PrettyXML(); err != nil {
-			return err
-		} else {
-			sigPrettyXML[k] = sha256.Sum256(b)
-		}
-		if b, err := gen[k].PrettyJSON(); err != nil {
-			return err
-		} else {
-			sigPrettyJSON[k] = sha256.Sum256(b)
-		}
-
-		b := gen[k].Legacy()
-		sigLegacy[k] = sha256.Sum256(b)
-	}
-
-	return nil
-}
-
-func restoreState(tb testing.TB) {
-
-	tb.Helper()
-
-	if err := createObjects(); err != nil {
-		tb.Fatal(err)
+	if fh, err := os.Open(`testdata.json`); err != nil {
+		return err
+	} else {
+		defer fh.Close()
+		return json.NewDecoder(fh).Decode(&td)
 	}
 }
-
-func getMagtekDevice(tb testing.TB, c *gousb.Context) (mdev *usbci.Magtek, err error) {
-
-	tb.Helper()
-
-	dev, err := c.OpenDeviceWithVIDPID(0x0801, 0x0001)
-
-	if dev != nil {
-		mdev, err = usbci.NewMagtek(dev)
-	}
-
-	return mdev, err
-}
-

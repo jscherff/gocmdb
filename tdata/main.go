@@ -24,6 +24,7 @@ import (
 )
 
 type TestData struct {
+	Jsn map[string][]byte
 	Mag map[string]*usbci.Magtek
 	Gen map[string]*usbci.Generic
 	Sig map[string]map[string][32]byte
@@ -33,6 +34,8 @@ type TestData struct {
 
 var (
 	td = &TestData{
+
+		Jsn: make(map[string][]byte),
 
 		Mag: make(map[string]*usbci.Magtek),
 		Gen: make(map[string]*usbci.Generic),
@@ -74,6 +77,10 @@ func main() {
 	}
 
 	if err := generateSigs(); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := generateJson(); err != nil {
 		log.Fatal(err)
 	}
 
@@ -164,6 +171,29 @@ func generateSigs() error {
 
 		b := d.Legacy()
 		td.Sig[`Leg`][k] = sha256.Sum256(b)
+	}
+
+	return nil
+}
+
+func generateJson() error {
+
+	for k, d := range td.Mag {
+
+		if b, err := json.Marshal(d); err != nil {
+			return err
+		} else {
+			td.Jsn[k] = b
+		}
+	}
+
+	for k, d := range td.Gen {
+
+		if b, err := json.Marshal(d); err != nil {
+			return err
+		} else {
+			td.Jsn[k] = b
+		}
 	}
 
 	return nil

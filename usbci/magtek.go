@@ -66,15 +66,14 @@ type Magtek struct {
 // NewMagtek instantiates a Magtek wrapper for an existing gousb Device.
 func NewMagtek(gd *gousb.Device) (*Magtek, error) {
 
-	vm := make(map[string]string)
+	this := &Magtek{&Generic{Device: gd}}
 
 	if gd == nil {
-		return &Magtek{&Generic{Device: &gousb.Device{}, Vendor: vm}}, nil
+		return this, nil
 	}
 
 	var err error
 
-	this := &Magtek{&Generic{Device: gd, Vendor: vm}}
 	errs := this.Init()
 
 	if errs[`BufferSize`] {this = nil}

@@ -99,15 +99,14 @@ type Generic struct {
 // NewGeneric instantiates a Generic wrapper for an existing gousb Device.
 func NewGeneric(gd *gousb.Device) (*Generic, error) {
 
-	vm := make(map[string]string)
+	this := &Generic{Device: gd}
 
 	if gd == nil {
-		return &Generic{Device: &gousb.Device{}, Vendor: vm}, nil
+		return this, nil
 	}
 
 	var err error
 
-	this := &Generic{Device: gd, Vendor: vm}
 	errs := this.Init()
 
 	if len(errs) > 0 {

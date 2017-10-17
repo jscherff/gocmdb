@@ -91,6 +91,8 @@ func TestPersistenceMethods(t *testing.T) {
 		err = mag3.RestoreFile(fn)
 		gotest.Ok(t, err)
 
+		fmt.Printf("\n\n%#v\n\n", td.Mag[`mag1`].Generic)
+		fmt.Printf("\n\n%#v\n\n", mag3.Generic)
 		gotest.Assert(t, reflect.DeepEqual(td.Mag[`mag1`], mag3), `restored device not identical to saved device`)
 	})
 
@@ -245,10 +247,10 @@ func TestChangeMethods(t *testing.T) {
 
 		if len(mag3.Changes) < 1 { return }
 
-		gotest.Assert(t, reflect.DeepEqual(mag3.GetChanges()[0], changes),
-			`(device).GetChanges() returns bad data`)
 		gotest.Assert(t, reflect.DeepEqual(mag3.Changes[0], changes),
 			`(device).Changes contains bad data`)
+		gotest.Assert(t, reflect.DeepEqual(mag3.GetChanges()[0], changes),
+			`(device).GetChanges() returns bad data`)
 	})
 
 	t.Run("SetChanges() and GetChanges()", func(t *testing.T) {
